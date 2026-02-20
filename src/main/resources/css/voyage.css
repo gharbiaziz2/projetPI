@@ -1,0 +1,259 @@
+/* ========== CarthageVoyage – Full design: logo + buttons + layout ========== */
+
+.root {
+    -fx-font-family: "Segoe UI", "SF Pro Display", -apple-system, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #eef0f2;
+}
+
+/* ========== Left sidebar – dark blue + logo box ========== */
+.login-left-panel,
+.signup-left-panel {
+    -fx-background-color: linear-gradient(to bottom, #1a2332 0%, #243447 50%, #2c3e50 100%);
+    -fx-min-width: 360px;
+    -fx-pref-width: 360px;
+    -fx-padding: 48 32;
+}
+
+/* Logo container: rounded box so logo always has a visible frame */
+.logo-container {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-background-radius: 20;
+    -fx-padding: 24;
+    -fx-min-width: 160px;
+    -fx-min-height: 160px;
+    -fx-pref-width: 160px;
+    -fx-pref-height: 160px;
+    -fx-max-width: 160px;
+    -fx-max-height: 160px;
+    -fx-alignment: center;
+}
+
+.login-left-panel .logo-container .image-view,
+.signup-left-panel .logo-container .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 2);
+}
+
+/* Fallback when no logo image: text in same box */
+.logo-fallback {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255,255,255,0.95);
+}
+
+.app-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 24 0 0 0;
+}
+
+.app-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(255,255,255,0.88);
+    -fx-padding: 8 0 0 0;
+}
+
+/* ========== Form card ========== */
+.login-form-container,
+.signup-form-container {
+    -fx-padding: 44 52;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 28, 0, 0, 4);
+    -fx-min-width: 400px;
+    -fx-max-width: 440px;
+}
+
+/* Small logo on form card (optional) */
+.form-logo {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 1);
+}
+
+.form-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a2332;
+    -fx-padding: 0 0 24 0;
+}
+
+.field-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+    -fx-padding: 6 0 2 0;
+}
+
+.photo-browse-row {
+    -fx-min-width: 300px;
+    -fx-max-width: 320px;
+}
+
+.photo-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+
+/* ========== Inputs ========== */
+.voyage-input {
+    -fx-pref-height: 46px;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-text-fill: #1a2332;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-font-size: 14px;
+    -fx-padding: 0 16;
+    -fx-min-width: 300px;
+    -fx-max-width: 336px;
+}
+
+.voyage-input:focused {
+    -fx-border-color: #2c3e50;
+    -fx-background-color: #ffffff;
+}
+
+.voyage-input:hover {
+    -fx-border-color: #cbd5e1;
+}
+
+.voyage-combo {
+    -fx-pref-height: 46px;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-min-width: 300px;
+    -fx-max-width: 336px;
+}
+
+.voyage-combo:hover {
+    -fx-border-color: #cbd5e1;
+}
+
+.voyage-combo:focused {
+    -fx-border-color: #2c3e50;
+}
+
+.voyage-combo .list-cell {
+    -fx-text-fill: #1a2332;
+}
+
+/* ========== Buttons – full design (no default skin override) ========== */
+.voyage-button {
+    -fx-pref-height: 48px;
+    -fx-min-width: 300px;
+    -fx-max-width: 336px;
+    -fx-background-radius: 10;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0 24;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* Primary: gradient + shadow */
+.voyage-button.primary {
+    -fx-background-color: linear-gradient(to bottom, #3498db 0%, #2980b9 100%);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.4), 10, 0, 0, 2);
+}
+
+.voyage-button.primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #5dade2 0%, #3498db 100%);
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.5), 12, 0, 0, 3);
+}
+
+.voyage-button.primary:pressed {
+    -fx-background-color: #2471a3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 6, 0, 0, 1);
+}
+
+/* Link-style button */
+.link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2980b9;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+    -fx-cursor: hand;
+    -fx-padding: 4 8;
+    -fx-min-width: 0;
+    -fx-max-width: 9999;
+}
+
+.link-button:hover {
+    -fx-text-fill: #3498db;
+}
+
+.link-button:pressed {
+    -fx-text-fill: #1a5276;
+}
+
+/* Browse (secondary) button */
+.voyage-button.browse-button {
+    -fx-min-width: 120px;
+    -fx-max-width: 140px;
+    -fx-background-color: linear-gradient(to bottom, #ecf0f1 0%, #bdc3c7 100%);
+    -fx-text-fill: #2c3e50;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);
+}
+
+.voyage-button.browse-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #d5dbdb 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 1);
+}
+
+.voyage-button.browse-button:pressed {
+    -fx-background-color: #bdc3c7;
+}
+
+/* ========== Errors ========== */
+.error-label {
+    -fx-text-fill: #c0392b;
+    -fx-font-size: 12px;
+    -fx-padding: 4 0 0 0;
+}
+
+/* ========== ScrollPane ========== */
+.signup-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.signup-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.signup-scroll .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.signup-scroll .scroll-bar .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 6;
+}
+
+.signup-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: #94a3b8;
+}
+
+.signup-scroll .scroll-bar .increment-button,
+.signup-scroll .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.login-form-container .label,
+.signup-form-container .label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+}
