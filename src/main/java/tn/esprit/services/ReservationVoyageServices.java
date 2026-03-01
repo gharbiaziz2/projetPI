@@ -29,17 +29,29 @@ public class ReservationVoyageServices {
     }
 
     public void ajouter(ReservationVoyage r) throws SQLException {
+        ajouterAndReturnId(r);
+    }
+
+    /**
+     * Inserts a new reservation and returns its generated id_reservation_voyage.
+     */
+    public int ajouterAndReturnId(ReservationVoyage r) throws SQLException {
         if (existsByUserAndVoyage(r.getIdUser(), r.getIdVoyage())) {
             throw new SQLException("DUPLICATE_VOYAGE");
         }
         String sql = "INSERT INTO reservation_voyage (date_reservation, statut, montant_total, id_user, id_voyage) VALUES (?,?,?,?,?)";
-        PreparedStatement ps = cnx.prepareStatement(sql);
+        PreparedStatement ps = cnx.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
         ps.setDate(1, Date.valueOf(r.getDateReservation()));
         ps.setString(2, r.getStatut().name());
         ps.setBigDecimal(3, r.getMontantTotal());
         ps.setInt(4, r.getIdUser());
         ps.setInt(5, r.getIdVoyage());
         ps.executeUpdate();
+        ResultSet keys = ps.getGeneratedKeys();
+        if (keys.next()) {
+            return keys.getInt(1);
+        }
+        throw new SQLException("Impossible de récupérer l'ID de la réservation.");
     }
 
     public void modifier(ReservationVoyage r) throws SQLException {
@@ -52,6 +64,16 @@ public class ReservationVoyageServices {
         ps.setInt(5, r.getIdVoyage());
         ps.setInt(6, r.getIdReservationVoyage());
         ps.executeUpdate();
+    }
+
+    public void updateStatut(int idReservationVoyage, ReservationTransport.StatutReservation statut)
+            throws SQLException {
+        String sql = "UPDATE reservation_voyage SET statut=? WHERE id_reservation_voyage=?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, statut.name());
+        ps.setInt(2, idReservationVoyage);
+        ps.executeUpdate();
+        ps.close();
     }
 
     public void supprimer(int idReservationVoyage) throws SQLException {
@@ -73,8 +95,7 @@ public class ReservationVoyageServices {
                     ReservationTransport.StatutReservation.valueOf(rs.getString("statut")),
                     rs.getBigDecimal("montant_total"),
                     rs.getInt("id_user"),
-                    rs.getInt("id_voyage")
-            );
+                    rs.getInt("id_voyage"));
             list.add(r);
         }
         return list;

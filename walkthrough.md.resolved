@@ -1,0 +1,77 @@
+# ✅ Email Confirmation + Voyage Reservation Status — Walkthrough
+
+## Ce qui a été implémenté
+
+### 1. [pom.xml](file:///d:/dashboard/pom.xml) — Dépendance JavaMail
+```xml
+<dependency>
+    <groupId>com.sun.mail</groupId>
+    <artifactId>jakarta.mail</artifactId>
+    <version>2.0.1</version>
+</dependency>
+```
+
+---
+
+### 2. [EmailService.java](file:///d:/dashboard/src/main/java/tn/esprit/services/EmailService.java) — Nouveau
+- Envoie un **email HTML stylisé** via Gmail SMTP (TLS port 587)
+- Tourne sur un thread daemon → **non bloquant** pour l'UI
+- Credentials : `carthagevoyage@gmail.com` + App Password configuré
+
+---
+
+### 3. [ReservationVoyageServices.java](file:///d:/dashboard/src/main/java/tn/esprit/services/ReservationVoyageServices.java) — [updateStatut()](file:///d:/dashboard/src/main/java/tn/esprit/services/ReservationVoyageServices.java#57-66) ajouté
+```java
+public void updateStatut(int idReservationVoyage, StatutReservation statut) throws SQLException
+```
+Exécute `UPDATE reservation_voyage SET statut=? WHERE id_reservation_voyage=?`
+
+---
+
+### 4. [FrontVoyagesController.java](file:///d:/dashboard/src/main/java/tn/esprit/gui/FrontVoyagesController.java) — [onReserve()](file:///d:/dashboard/src/main/java/tn/esprit/gui/FrontVoyagesController.java#314-366) modifié
+
+**Avant :** statut = `CONFIRMEE`
+**Après :** statut = `EN_ATTENTE` + envoi email automatique
+
+```java
+rv.setStatut(ReservationTransport.StatutReservation.EN_ATTENTE);
+EmailService.sendReservationConfirmation(userEmail, userName, vType, dDepart, dRetour, montant);
+```
+
+---
+
+### 5. [MyReservationsController.java](file:///d:/dashboard/src/main/java/tn/esprit/gui/MyReservationsController.java) — Bouton Confirmer
+
+- Bouton **✅ Confirmer** (vert) affiché **uniquement** si statut = `EN_ATTENTE`
+- Clic → dialog de confirmation → [updateStatut(CONFIRMEE)](file:///d:/dashboard/src/main/java/tn/esprit/services/ReservationVoyageServices.java#57-66) → label mis à jour → bouton caché
+
+---
+
+## Flux complet
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant F as FrontVoyages
+    participant DB as Base de données
+    participant E as EmailService
+
+    U->>F: Clique "Réserver"
+    F->>DB: INSERT reservation_voyage (statut=EN_ATTENTE)
+    F->>E: sendReservationConfirmation() [thread daemon]
+    E-->>U: 📧 Email HTML envoyé à l'adresse du client
+    F-->>U: ✅ "Réservation enregistrée (EN ATTENTE)"
+
+    U->>F: Ouvre "Mes Réservations"
+    F-->>U: Carte avec statut "EN_ATTENTE" + bouton ✅ Confirmer
+    U->>F: Clique "✅ Confirmer"
+    F->>DB: UPDATE reservation_voyage SET statut=CONFIRMEE
+    F-->>U: Label → "CONFIRMEE", bouton caché
+```
+
+## Pour tester
+1. Lancez l'app via IntelliJ (Maven → `javafx:run`)
+2. Connectez-vous en tant que client
+3. Cliquez **Réserver** sur un voyage → vérifiez l'email reçu
+4. Allez dans **Mes Réservations** → cliquez **✅ Confirmer**
+5. Vérifiez le statut en DB : `SELECT statut FROM reservation_voyage`
