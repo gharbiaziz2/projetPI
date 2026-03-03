@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.FrontForumController"
+      spacing="20" styleClass="front-content">
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Forum" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+        <Button fx:id="btnAddPost" text="+ Nouveau message" styleClass="btn-reserve" onAction="#onAddPost"/>
+    </HBox>
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <VBox fx:id="postsContainer" spacing="12"/>
+    </ScrollPane>
+</VBox>

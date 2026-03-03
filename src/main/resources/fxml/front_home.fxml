@@ -3,7 +3,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" spacing="16" styleClass="front-content">
-    <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
-    <Label text="Utilisez le menu en haut à droite pour modifier votre profil ou vous déconnecter." style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
-</VBox>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.FrontHomeController"
+           fitToWidth="true" styleClass="front-scroll-pane">
+    <VBox fx:id="homeContent" alignment="CENTER_LEFT" spacing="16" styleClass="front-content">
+        <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+        <Label text="Utilisez le menu en haut à droite pour modifier votre profil ou vous déconnecter." style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+        <Label text="Calendrier des activités (cliquez sur une date pour voir les détails)" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 24 0 8 0;"/>
+        <HBox fx:id="calendarSection" spacing="24" alignment="TOP_LEFT"/>
+        <Label text="Carte et attractions à proximité" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 24 0 8 0;"/>
+        <VBox fx:id="mapSection" spacing="12"/>
+        <Label text="Vols en temps réel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 24 0 8 0;"/>
+        <VBox fx:id="flightsSection" spacing="12"/>
+        <Label text="Météo" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 24 0 8 0;"/>
+        <VBox fx:id="weatherContainer" spacing="12"/>
+    </VBox>
+</ScrollPane>

@@ -5,6 +5,7 @@ import tn.esprit.entities.Activite;
 import tn.esprit.entities.VoyageActivite;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,17 +55,27 @@ public class VoyageActiviteServices {
     /** Returns activities linked to the given voyage. */
     public List<Activite> getActivitesForVoyage(int idVoyage) throws SQLException {
         List<Activite> list = new ArrayList<>();
-        String sql = "SELECT a.id_activite, a.nom, a.description, a.prix, a.duree FROM activite a INNER JOIN voyage_activite va ON a.id_activite = va.id_activite WHERE va.id_voyage = ?";
+        String sql = "SELECT a.id_activite, a.nom, a.description, a.prix, a.duree, a.latitude, a.longitude, a.date_activite, a.photo FROM activite a INNER JOIN voyage_activite va ON a.id_activite = va.id_activite WHERE va.id_voyage = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idVoyage);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
+            Date dateVal = rs.getDate("date_activite");
+            LocalDate localDate = dateVal != null ? dateVal.toLocalDate() : null;
+            double latVal = rs.getDouble("latitude");
+            Double lat = rs.wasNull() ? null : latVal;
+            double lonVal = rs.getDouble("longitude");
+            Double lon = rs.wasNull() ? null : lonVal;
             list.add(new Activite(
                     rs.getInt("id_activite"),
                     rs.getString("nom"),
                     rs.getString("description"),
                     rs.getBigDecimal("prix"),
-                    rs.getInt("duree")
+                    rs.getInt("duree"),
+                    lat,
+                    lon,
+                    localDate,
+                    rs.getString("photo")
             ));
         }
         return list;

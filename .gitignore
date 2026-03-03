@@ -36,3 +36,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Secrets — NEVER commit API keys ###
+src/main/resources/config.properties
+src/main/resources/config/google-credentials.json
+
+### User-uploaded/captured photos ###
+user_photos/

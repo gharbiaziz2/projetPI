@@ -83,6 +83,25 @@
     -fx-padding: 6 0 2 0;
 }
 
+/* Password requirements - real-time red/green feedback */
+.password-requirements {
+    -fx-padding: 4 0 0 4;
+}
+
+.pwd-req {
+    -fx-font-size: 12px;
+    -fx-padding: 2 0;
+}
+
+.pwd-req-fail {
+    -fx-text-fill: #c0392b;
+}
+
+.pwd-req-pass {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: bold;
+}
+
 .photo-browse-row {
     -fx-min-width: 300px;
     -fx-max-width: 320px;
@@ -214,6 +233,65 @@
 
 .voyage-button.browse-button:pressed {
     -fx-background-color: #bdc3c7;
+}
+
+/* Google Sign-In button */
+.voyage-button.google-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #3c4043;
+    -fx-border-color: #dadce0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);
+}
+
+.voyage-button.google-button:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #cbd5e1;
+}
+
+.voyage-button.google-button:pressed {
+    -fx-background-color: #e8eaed;
+}
+
+/* Face recognition button */
+.voyage-button.face-button {
+    -fx-background-color: linear-gradient(to bottom, #5c6bc0 0%, #3949ab 100%);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(92,107,192,0.4), 10, 0, 0, 2);
+}
+
+.voyage-button.face-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #7986cb 0%, #5c6bc0 100%);
+}
+
+.voyage-button.face-button:pressed {
+    -fx-background-color: #303f9f;
+}
+
+.forgot-pwd-row {
+    -fx-pref-width: 336px;
+    -fx-max-width: 336px;
+}
+
+.or-divider {
+    -fx-pref-width: 336px;
+    -fx-max-width: 336px;
+}
+
+.or-divider .label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-padding: 0 12;
+}
+
+.divider-line {
+    -fx-pref-height: 1;
+    -fx-min-height: 1;
+    -fx-max-height: 1;
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 1;
+    -fx-min-width: 60px;
 }
 
 /* ========== Errors ========== */

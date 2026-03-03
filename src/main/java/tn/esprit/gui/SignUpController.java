@@ -1,5 +1,6 @@
 package tn.esprit.gui;
 
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,6 +16,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
 import tn.esprit.services.UserServices;
+import tn.esprit.util.PasswordUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +30,6 @@ public class SignUpController {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+\\s\\-]{8,20}$");
-    private static final int MIN_PASSWORD_LENGTH = 6;
 
     @FXML private TextField nomField;
     @FXML private TextField prenomField;
@@ -40,6 +41,7 @@ public class SignUpController {
     @FXML private TextField adresseField;
     @FXML private Label photoLabel;
     @FXML private javafx.scene.control.Button browsePhotoButton;
+    @FXML private javafx.scene.control.Button cameraPhotoButton;
     @FXML private Label nomError;
     @FXML private Label prenomError;
     @FXML private Label emailError;
@@ -47,6 +49,11 @@ public class SignUpController {
     @FXML private Label confirmPasswordError;
     @FXML private Label roleError;
     @FXML private Label telephoneError;
+    @FXML private Label reqLength;
+    @FXML private Label reqUppercase;
+    @FXML private Label reqLowercase;
+    @FXML private Label reqDigit;
+    @FXML private Label reqSpecial;
     @FXML private Label photoError;
     @FXML private Label signUpError;
     @FXML private javafx.scene.control.Button signUpButton;
@@ -93,7 +100,28 @@ public class SignUpController {
                 logoFallback.setManaged(true);
             }
         }
+        setupPasswordStrengthFeedback();
         clearErrors();
+    }
+
+    private void setupPasswordStrengthFeedback() {
+        ChangeListener<String> listener = (obs, ov, nv) -> updatePasswordRequirements(nv != null ? nv : "");
+        if (passwordField != null) passwordField.textProperty().addListener(listener);
+        updatePasswordRequirements(passwordField != null ? passwordField.getText() : "");
+    }
+
+    private void updatePasswordRequirements(String pwd) {
+        if (reqLength != null) updateReqLabel(reqLength, PasswordUtil.hasMinLength(pwd), "8 caractères minimum");
+        if (reqUppercase != null) updateReqLabel(reqUppercase, PasswordUtil.hasUppercase(pwd), "Au moins une majuscule");
+        if (reqLowercase != null) updateReqLabel(reqLowercase, PasswordUtil.hasLowercase(pwd), "Au moins une minuscule");
+        if (reqDigit != null) updateReqLabel(reqDigit, PasswordUtil.hasDigit(pwd), "Au moins un chiffre");
+        if (reqSpecial != null) updateReqLabel(reqSpecial, PasswordUtil.hasSpecialChar(pwd), "Au moins un caractère spécial (!@#$...)");
+    }
+
+    private void updateReqLabel(Label label, boolean pass, String text) {
+        label.setText((pass ? "✓ " : "✗ ") + text);
+        label.getStyleClass().removeAll("pwd-req-fail", "pwd-req-pass");
+        label.getStyleClass().add(pass ? "pwd-req-pass" : "pwd-req-fail");
     }
 
     private void clearErrors() {
@@ -152,13 +180,9 @@ public class SignUpController {
         }
 
         String password = passwordField.getText();
-        if (password == null || password.isBlank()) {
-            passwordError.setText("Le mot de passe est obligatoire.");
-            passwordError.setVisible(true);
-            passwordError.setManaged(true);
-            valid = false;
-        } else if (password.length() < MIN_PASSWORD_LENGTH) {
-            passwordError.setText("Le mot de passe doit contenir au moins " + MIN_PASSWORD_LENGTH + " caractères.");
+        String pwdError = PasswordUtil.validateStrong(password);
+        if (pwdError != null) {
+            passwordError.setText(pwdError);
             passwordError.setVisible(true);
             passwordError.setManaged(true);
             valid = false;
@@ -201,6 +225,16 @@ public class SignUpController {
         if (f != null) {
             selectedPhotoPath = f.getAbsolutePath();
             photoLabel.setText(f.getName());
+        }
+    }
+
+    @FXML
+    private void onCameraPhoto() {
+        javafx.stage.Stage stage = (javafx.stage.Stage) (cameraPhotoButton != null ? cameraPhotoButton.getScene().getWindow() : null);
+        String path = new CameraCaptureDialog().showAndCapture(stage);
+        if (path != null) {
+            selectedPhotoPath = path;
+            photoLabel.setText(new File(path).getName());
         }
     }
 

@@ -13,15 +13,23 @@ public class TransportLocal {
     private LocalDate dateRetour;
     private BigDecimal prix;
     private int idVoyage;
+    private int nbrPlaces;
 
     public enum TypeTransport { VOL, VOITURE, TAXI, BATEAU, MOTO }
 
     public TransportLocal() {
+        this.nbrPlaces = 10;
     }
 
     public TransportLocal(int idTransport, String compagnie, TypeTransport typeTransport,
                           String paysDepart, String paysArrivee, LocalDate dateDepart, LocalDate dateRetour,
                           BigDecimal prix, int idVoyage) {
+        this(idTransport, compagnie, typeTransport, paysDepart, paysArrivee, dateDepart, dateRetour, prix, idVoyage, 10);
+    }
+
+    public TransportLocal(int idTransport, String compagnie, TypeTransport typeTransport,
+                          String paysDepart, String paysArrivee, LocalDate dateDepart, LocalDate dateRetour,
+                          BigDecimal prix, int idVoyage, int nbrPlaces) {
         this.idTransport = idTransport;
         this.compagnie = compagnie;
         this.typeTransport = typeTransport;
@@ -31,6 +39,7 @@ public class TransportLocal {
         this.dateRetour = dateRetour;
         this.prix = prix;
         this.idVoyage = idVoyage;
+        this.nbrPlaces = nbrPlaces;
     }
 
     public int getIdTransport() { return idTransport; }
@@ -51,4 +60,6 @@ public class TransportLocal {
     public void setPrix(BigDecimal prix) { this.prix = prix; }
     public int getIdVoyage() { return idVoyage; }
     public void setIdVoyage(int idVoyage) { this.idVoyage = idVoyage; }
+    public int getNbrPlaces() { return nbrPlaces; }
+    public void setNbrPlaces(int nbrPlaces) { this.nbrPlaces = nbrPlaces; }
 }
