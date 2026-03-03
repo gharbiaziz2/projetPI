@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="20" styleClass="content-pane">
+    <Label text="Tableau de bord" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+    <GridPane hgap="20" vgap="20">
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="0" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+            <Label text="UTILISATEURS" styleClass="dashboard-card-title"/>
+            <Label fx:id="statUsers" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="1" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+            <Label text="CLIENTS" styleClass="dashboard-card-title"/>
+            <Label fx:id="statClients" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="2" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+            <Label text="GUIDES" styleClass="dashboard-card-title"/>
+            <Label fx:id="statGuides" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+    </GridPane>
+</VBox>

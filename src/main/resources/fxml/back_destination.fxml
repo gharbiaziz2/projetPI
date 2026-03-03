@@ -6,6 +6,7 @@
         <Button fx:id="btnAdd" text="+ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
         <Button fx:id="btnEdit" text="Modifier" styleClass="btn-secondary" onAction="#onEdit"/>
         <Button fx:id="btnDelete" text="Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+        <Button fx:id="btnCountryInfo" text="🌍 Infos pays" styleClass="btn-secondary" onAction="#onCountryInfo"/>
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="220"/>
         <Button fx:id="btnFilter" text="Filtrage" styleClass="btn-filter" onAction="#onFilter"/>

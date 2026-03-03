@@ -3,19 +3,26 @@ package tn.esprit.gui;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.DatePicker;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import tn.esprit.entities.Activite;
 import tn.esprit.gui.DialogStyleHelper;
 import tn.esprit.services.ActiviteServices;
+import tn.esprit.services.NotificationServices;
 
+import javafx.stage.FileChooser;
+
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class ActiviteController {
 
@@ -24,10 +31,14 @@ public class ActiviteController {
     @FXML private TableColumn<Activite, String> colDescription;
     @FXML private TableColumn<Activite, BigDecimal> colPrix;
     @FXML private TableColumn<Activite, Number> colDuree;
+    @FXML private TableColumn<Activite, String> colLatitude;
+    @FXML private TableColumn<Activite, String> colLongitude;
+    @FXML private TableColumn<Activite, LocalDate> colDate;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
 
     private final ActiviteServices service = new ActiviteServices();
+    private final NotificationServices notificationService = new NotificationServices();
     private final ObservableList<Activite> list = FXCollections.observableArrayList();
     private final FilteredList<Activite> filteredList = new FilteredList<>(list, p -> true);
     private BigDecimal filterPrixMax;
@@ -39,6 +50,9 @@ public class ActiviteController {
         colDescription.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDescription() != null ? c.getValue().getDescription() : ""));
         colPrix.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getPrix()));
         colDuree.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDuree()));
+        colLatitude.setCellValueFactory(c -> new SimpleStringProperty(formatCoord(c.getValue().getLatitude())));
+        colLongitude.setCellValueFactory(c -> new SimpleStringProperty(formatCoord(c.getValue().getLongitude())));
+        colDate.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDate()));
         table.setItems(filteredList);
         if (searchField != null) searchField.textProperty().addListener((o, ov, nv) -> applyFilter());
         refresh();
@@ -91,6 +105,8 @@ public class ActiviteController {
         if (showDialog(a, "Ajouter activite")) {
             try {
                 service.ajouter(a);
+                String msg = "Nouvelle activité : " + a.getNom() + (a.getPrix() != null ? " (" + a.getPrix() + " TND)" : "") + ".";
+                notificationService.notifyAllClients(msg);
                 refresh();
             } catch (SQLException e) { showError("Erreur", "Ajout impossible."); }
         }
@@ -127,15 +143,43 @@ public class ActiviteController {
         TextField desc = new TextField(a.getDescription());
         TextField prix = new TextField(a.getPrix() != null ? a.getPrix().toString() : "");
         TextField duree = new TextField(a.getDuree() > 0 ? String.valueOf(a.getDuree()) : "");
+        TextField latitude = new TextField(a.getLatitude() != null ? String.valueOf(a.getLatitude()) : "");
+        latitude.setPromptText("ex: 36.8065");
+        TextField longitude = new TextField(a.getLongitude() != null ? String.valueOf(a.getLongitude()) : "");
+        longitude.setPromptText("ex: 10.1815");
+        DatePicker datePicker = new DatePicker(a.getDate());
+        datePicker.setPromptText("jj/mm/aaaa");
+        TextField photo = new TextField(a.getPhoto() != null ? a.getPhoto() : "");
+        photo.setPromptText("Chemin ou Parcourir...");
+        Button browsePhoto = new Button("Parcourir");
+        browsePhoto.setOnAction(ev -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Choisir une photo");
+            fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+            File f = fc.showOpenDialog(browsePhoto.getScene().getWindow());
+            if (f != null) photo.setText(f.getAbsolutePath());
+        });
+        HBox photoBox = new HBox(8);
+        photoBox.getChildren().addAll(photo, browsePhoto);
+        photoBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        DialogStyleHelper.styleField(photo);
         GridPane g = DialogStyleHelper.buildGrid();
         DialogStyleHelper.addRow(g, 0, "Nom *", nom);
         DialogStyleHelper.addRow(g, 1, "Description", desc);
         DialogStyleHelper.addRow(g, 2, "Prix *", prix);
         DialogStyleHelper.addRow(g, 3, "Durée (min) *", duree);
+        DialogStyleHelper.addRow(g, 4, "Latitude", latitude);
+        DialogStyleHelper.addRow(g, 5, "Longitude", longitude);
+        DialogStyleHelper.addRow(g, 6, "Date", datePicker);
+        DialogStyleHelper.addRow(g, 7, "Photo", photoBox);
         DialogStyleHelper.styleField(nom);
         DialogStyleHelper.styleField(desc);
         DialogStyleHelper.styleField(prix);
         DialogStyleHelper.styleField(duree);
+        DialogStyleHelper.styleField(latitude);
+        DialogStyleHelper.styleField(longitude);
+        DialogStyleHelper.styleDatePicker(datePicker);
         VBox content = new VBox(new Label(title), g);
         content.getStyleClass().add("crud-dialog-content");
         ((Label) content.getChildren().get(0)).getStyleClass().add("crud-dialog-title");
@@ -154,6 +198,13 @@ public class ActiviteController {
             a.setDescription(desc.getText() != null && !desc.getText().isBlank() ? desc.getText().trim() : null);
             a.setPrix(p);
             a.setDuree(du);
+            Double latVal = null, lonVal = null;
+            try { if (latitude.getText() != null && !latitude.getText().isBlank()) latVal = Double.parseDouble(latitude.getText().trim()); } catch (Exception ignored) {}
+            try { if (longitude.getText() != null && !longitude.getText().isBlank()) lonVal = Double.parseDouble(longitude.getText().trim()); } catch (Exception ignored) {}
+            a.setLatitude(latVal);
+            a.setLongitude(lonVal);
+            a.setDate(datePicker.getValue());
+            a.setPhoto(photo.getText() != null && !photo.getText().isBlank() ? photo.getText().trim() : null);
             return a;
         });
         return d.showAndWait().orElse(null) != null;
@@ -164,6 +215,10 @@ public class ActiviteController {
         a.setContentText(msg);
         a.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
         return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+    }
+
+    private String formatCoord(Double value) {
+        return value != null ? String.format("%.4f", value) : "";
     }
 
     private void showError(String t, String m) {

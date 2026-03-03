@@ -41,7 +41,7 @@ public class FrontTransportController implements Initializable {
     public void loadCards() {
         cardsContainer.getChildren().clear();
         try {
-            for (TransportLocal t : transportService.afficher()) {
+            for (TransportLocal t : transportService.getAvailableTransports()) {
                 VBox card = buildTransportCard(t);
                 cardsContainer.getChildren().add(card);
             }
@@ -65,10 +65,13 @@ public class FrontTransportController implements Initializable {
         Label datesL = new Label(dates);
         Label prixL = new Label("Prix: " + (t.getPrix() != null ? t.getPrix().toString() : "0") + " DT");
         prixL.getStyleClass().add("card-price");
+        int places = t.getNbrPlaces();
+        Label placesL = new Label(places + " place" + (places > 1 ? "s" : "") + " disponible" + (places > 1 ? "s" : ""));
+        placesL.getStyleClass().add("card-statut");
         Button bookBtn = new Button("Réserver");
         bookBtn.getStyleClass().add("btn-reserve");
         bookBtn.setOnAction(e -> onBook(t));
-        card.getChildren().addAll(compL, typeL, paysL, datesL, prixL, bookBtn);
+        card.getChildren().addAll(compL, typeL, paysL, datesL, prixL, placesL, bookBtn);
         return card;
     }
 
@@ -78,14 +81,8 @@ public class FrontTransportController implements Initializable {
             showError("Connexion requise", "Veuillez vous connecter pour réserver.");
             return;
         }
-        try {
-            java.util.List<Integer> bookedIds = reservationTransportTransportService.getTransportIdsBookedForDate(LocalDate.now());
-            if (bookedIds.contains(transport.getIdTransport())) {
-                showError("Indisponible", "Ce transport est déjà réservé pour la date sélectionnée. Choisissez une autre date ou un autre transport.");
-                return;
-            }
-        } catch (SQLException e) {
-            showError("Erreur", "Impossible de vérifier la disponibilité.");
+        if (transport.getNbrPlaces() <= 0) {
+            showError("Indisponible", "Plus aucune place disponible pour ce transport.");
             return;
         }
         javafx.scene.control.DatePicker datePicker = new javafx.scene.control.DatePicker(LocalDate.now());
@@ -102,9 +99,8 @@ public class FrontTransportController implements Initializable {
         d.showAndWait().ifPresent(chosenDate -> {
             if (chosenDate == null) return;
             try {
-                java.util.List<Integer> bookedIds = reservationTransportTransportService.getTransportIdsBookedForDate(chosenDate);
-                if (bookedIds.contains(transport.getIdTransport())) {
-                    showError("Indisponible", "Ce transport est déjà réservé pour cette date.");
+                if (transport.getNbrPlaces() <= 0) {
+                    showError("Indisponible", "Plus aucune place disponible.");
                     return;
                 }
                 ReservationTransport rt = new ReservationTransport();
@@ -114,6 +110,8 @@ public class FrontTransportController implements Initializable {
                 rt.setIdUser(user.getIdUser());
                 int idResa = reservationTransportService.ajouterAndReturnId(rt);
                 reservationTransportTransportService.ajouter(new ReservationTransportTransport(idResa, transport.getIdTransport()));
+                transportService.decrementerPlaces(transport.getIdTransport());
+                loadCards();
                 showSuccess("Réservation transport enregistrée.");
             } catch (SQLException e) {
                 showError("Erreur", "Impossible d'enregistrer la réservation.");

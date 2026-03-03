@@ -34,6 +34,7 @@ public class TransportLocalController {
     @FXML private TableColumn<TransportLocal, String> colDateDepart;
     @FXML private TableColumn<TransportLocal, String> colDateRetour;
     @FXML private TableColumn<TransportLocal, BigDecimal> colPrix;
+    @FXML private TableColumn<TransportLocal, Integer> colNbrPlaces;
     @FXML private TableColumn<TransportLocal, String> colIdVoyage;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
@@ -55,6 +56,7 @@ public class TransportLocalController {
         colDateDepart.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDateDepart() != null ? c.getValue().getDateDepart().format(D_FMT) : ""));
         colDateRetour.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDateRetour() != null ? c.getValue().getDateRetour().format(D_FMT) : ""));
         colPrix.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getPrix()));
+        if (colNbrPlaces != null) colNbrPlaces.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getNbrPlaces()));
         colIdVoyage.setCellValueFactory(c -> new SimpleStringProperty(voyageDisplay.getOrDefault(c.getValue().getIdVoyage(), String.valueOf(c.getValue().getIdVoyage()))));
         table.setItems(filteredList);
         if (searchField != null) searchField.textProperty().addListener((o, ov, nv) -> applyFilter());
@@ -157,6 +159,7 @@ public class TransportLocalController {
         DatePicker dateD = new DatePicker(t.getDateDepart());
         DatePicker dateR = new DatePicker(t.getDateRetour());
         TextField prix = new TextField(t.getPrix() != null ? t.getPrix().toString() : "");
+        TextField nbrPlacesF = new TextField(String.valueOf(t.getNbrPlaces() > 0 ? t.getNbrPlaces() : 10));
         ComboBox<Voyage> comboVoyage = new ComboBox<>();
         comboVoyage.setConverter(new StringConverter<Voyage>() {
             @Override public String toString(Voyage v) {
@@ -180,8 +183,9 @@ public class TransportLocalController {
         DialogStyleHelper.addRow(g, 4, "Date départ *", dateD);
         DialogStyleHelper.addRow(g, 5, "Date retour *", dateR);
         DialogStyleHelper.addRow(g, 6, "Prix *", prix);
-        DialogStyleHelper.addRow(g, 7, "Voyage *", comboVoyage);
-        DialogStyleHelper.styleField(compagnie); DialogStyleHelper.styleField(paysD); DialogStyleHelper.styleField(paysA); DialogStyleHelper.styleField(prix);
+        DialogStyleHelper.addRow(g, 7, "Nbr places *", nbrPlacesF);
+        DialogStyleHelper.addRow(g, 8, "Voyage *", comboVoyage);
+        DialogStyleHelper.styleField(compagnie); DialogStyleHelper.styleField(paysD); DialogStyleHelper.styleField(paysA); DialogStyleHelper.styleField(prix); DialogStyleHelper.styleField(nbrPlacesF);
         DialogStyleHelper.styleDatePicker(dateD); DialogStyleHelper.styleDatePicker(dateR);
         DialogStyleHelper.styleCombo(typeCombo); DialogStyleHelper.styleCombo(comboVoyage);
         VBox content = new VBox(new Label(title), g);
@@ -204,6 +208,11 @@ public class TransportLocalController {
             if (prix.getText() == null || prix.getText().isBlank()) { showError("Validation", "Prix obligatoire."); return null; }
             BigDecimal p;
             try { p = new BigDecimal(prix.getText().trim()); if (p.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
+            int nbrPlacesVal = 10;
+            try {
+                nbrPlacesVal = Integer.parseInt(nbrPlacesF.getText().trim());
+                if (nbrPlacesVal < 0) throw new NumberFormatException();
+            } catch (Exception e) { showError("Validation", "Nbr places invalide (entier >= 0)."); return null; }
             Voyage selVoyage = comboVoyage.getSelectionModel().getSelectedItem();
             if (selVoyage == null) { showError("Validation", "Voyage obligatoire."); return null; }
             t.setCompagnie(compagnie.getText().trim());
@@ -213,6 +222,7 @@ public class TransportLocalController {
             t.setDateDepart(dd);
             t.setDateRetour(dr);
             t.setPrix(p);
+            t.setNbrPlaces(nbrPlacesVal);
             t.setIdVoyage(selVoyage.getIdVoyage());
             return t;
         });

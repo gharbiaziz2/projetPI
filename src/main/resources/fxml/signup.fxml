@@ -32,6 +32,13 @@
                 <TextField fx:id="emailField" promptText="Email *" styleClass="voyage-input"/>
                 <Label fx:id="emailError" styleClass="error-label" visible="false" managed="false"/>
                 <PasswordField fx:id="passwordField" promptText="Mot de passe *" styleClass="voyage-input"/>
+                <VBox fx:id="passwordRequirementsBox" spacing="4" styleClass="password-requirements">
+                    <Label fx:id="reqLength" text="✗ 8 caractères minimum" styleClass="pwd-req pwd-req-fail"/>
+                    <Label fx:id="reqUppercase" text="✗ Au moins une majuscule" styleClass="pwd-req pwd-req-fail"/>
+                    <Label fx:id="reqLowercase" text="✗ Au moins une minuscule" styleClass="pwd-req pwd-req-fail"/>
+                    <Label fx:id="reqDigit" text="✗ Au moins un chiffre" styleClass="pwd-req pwd-req-fail"/>
+                    <Label fx:id="reqSpecial" text="✗ Au moins un caractère spécial (!@#$...)" styleClass="pwd-req pwd-req-fail"/>
+                </VBox>
                 <Label fx:id="passwordError" styleClass="error-label" visible="false" managed="false"/>
                 <PasswordField fx:id="confirmPasswordField" promptText="Confirmer le mot de passe *" styleClass="voyage-input"/>
                 <Label fx:id="confirmPasswordError" styleClass="error-label" visible="false" managed="false"/>
@@ -43,7 +50,8 @@
                 <Label text="Photo de profil" styleClass="field-hint"/>
                 <HBox alignment="CENTER_LEFT" spacing="12" styleClass="photo-browse-row">
                     <Label fx:id="photoLabel" text="Aucune photo sélectionnée" styleClass="photo-label"/>
-                    <Button fx:id="browsePhotoButton" text="Parcourir..." styleClass="voyage-button browse-button" onAction="#onBrowsePhoto"/>
+                    <Button fx:id="browsePhotoButton" text="Depuis l'ordinateur" styleClass="voyage-button browse-button" onAction="#onBrowsePhoto"/>
+                    <Button fx:id="cameraPhotoButton" text="Depuis la caméra" styleClass="voyage-button browse-button" onAction="#onCameraPhoto"/>
                 </HBox>
                 <Label fx:id="photoError" styleClass="error-label" visible="false" managed="false"/>
                 <Label fx:id="signUpError" styleClass="error-label" wrapText="true" visible="false" managed="false"/>

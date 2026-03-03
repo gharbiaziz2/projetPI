@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.ProfileController"
+            fitToWidth="true" styleClass="front-content">
+    <VBox alignment="TOP_CENTER" spacing="20" styleClass="profile-card" maxWidth="500">
+        <Label text="Modifier mon profil" styleClass="profile-title"/>
+        <TextField fx:id="fieldNom" promptText="Nom *" styleClass="profile-input"/>
+        <TextField fx:id="fieldPrenom" promptText="Prénom *" styleClass="profile-input"/>
+        <TextField fx:id="fieldEmail" promptText="Email *" styleClass="profile-input"/>
+        <PasswordField fx:id="fieldPassword" promptText="Nouveau mot de passe (laisser vide pour inchangé)" styleClass="profile-input"/>
+        <TextField fx:id="fieldTelephone" promptText="Téléphone" styleClass="profile-input"/>
+        <TextField fx:id="fieldAdresse" promptText="Adresse" styleClass="profile-input"/>
+        <Label text="Photo (URL ou chemin)" style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <TextField fx:id="fieldPhoto" promptText="Photo" styleClass="profile-input" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnBrowsePhoto" text="Parcourir..." onAction="#browsePhoto"/>
+        </HBox>
+        <TextArea fx:id="fieldBio" promptText="Biographie" wrapText="true" prefRowCount="3" styleClass="profile-input"/>
+        <Button fx:id="btnSave" text="Enregistrer" styleClass="profile-save-btn" onAction="#saveProfile"/>
+    </VBox>
+</ScrollPane>

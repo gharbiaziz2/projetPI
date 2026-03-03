@@ -6,14 +6,29 @@
         <Button fx:id="btnAdd" text="+ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
         <Button fx:id="btnEdit" text="Modifier" styleClass="btn-secondary" onAction="#onEdit"/>
         <Button fx:id="btnDelete" text="Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+        <Button fx:id="btnPromo" text="Promo Flash" styleClass="btn-warning" style="-fx-background-color: #ff9800; -fx-text-fill: white; -fx-font-weight: bold;" onAction="#handlePromoFlash"/>
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="220"/>
-        <Button fx:id="btnFilter" text="Filtrage" styleClass="btn-filter" onAction="#onFilter"/>
+        <RadioButton fx:id="rbAll" text="All" selected="true" onAction="#onFilter" styleClass="filter-radio">
+            <toggleGroup>
+                <ToggleGroup fx:id="filterGroup"/>
+            </toggleGroup>
+        </RadioButton>
+        <RadioButton fx:id="rbVisible" text="Visible" onAction="#onFilter" styleClass="filter-radio">
+            <toggleGroup>
+                <fx:reference source="filterGroup"/>
+            </toggleGroup>
+        </RadioButton>
+        <RadioButton fx:id="rbNonVisible" text="Non visible" onAction="#onFilter" styleClass="filter-radio">
+            <toggleGroup>
+                <fx:reference source="filterGroup"/>
+            </toggleGroup>
+        </RadioButton>
     </HBox>
     <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
         <TableView fx:id="table" styleClass="table-view" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colTypeVoyage" text="Type" prefWidth="120"/>
+                <TableColumn fx:id="colTypeVoyage" text="Nom" prefWidth="120"/>
                 <TableColumn fx:id="colDateDepart" text="Date départ" prefWidth="100"/>
                 <TableColumn fx:id="colDateRetour" text="Date retour" prefWidth="100"/>
                 <TableColumn fx:id="colPrix" text="Prix" prefWidth="80"/>

@@ -10,12 +10,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
+import tn.esprit.services.NotificationServices;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 
 public class FrontController {
 
@@ -24,7 +28,10 @@ public class FrontController {
     @FXML private ImageView userAvatar;
     @FXML private Label userAvatarFallback;
     @FXML private javafx.scene.layout.StackPane avatarFallbackPane;
+    @FXML private Label notificationBadge;
     @FXML private StackPane contentStack;
+
+    private final NotificationServices notificationService = new NotificationServices();
 
     private ContextMenu userContextMenu;
 
@@ -35,6 +42,11 @@ public class FrontController {
         if (user != null) {
             loadUserAvatar(user);
         }
+        if (notificationBadge != null) {
+            StackPane.setAlignment(notificationBadge, Pos.TOP_RIGHT);
+            StackPane.setMargin(notificationBadge, new Insets(-2, -2, 0, 0));
+        }
+        refreshNotificationBadge();
         goHome();
     }
 
@@ -42,9 +54,11 @@ public class FrontController {
         userContextMenu = new ContextMenu();
         MenuItem itemProfile = new MenuItem("Modifier le profil");
         itemProfile.setOnAction(e -> goModifyProfile());
+        MenuItem itemNotifications = new MenuItem("Notifications");
+        itemNotifications.setOnAction(e -> goNotifications());
         MenuItem itemLogout = new MenuItem("Déconnexion");
         itemLogout.setOnAction(e -> logout());
-        userContextMenu.getItems().addAll(itemProfile, itemLogout);
+        userContextMenu.getItems().addAll(itemProfile, itemNotifications, itemLogout);
     }
 
     @FXML
@@ -99,6 +113,7 @@ public class FrontController {
             if (welcome != null && user != null) {
                 welcome.setText("Bienvenue, " + user.getPrenom() + " " + user.getNom());
             }
+            refreshNotificationBadge();
             contentStack.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,6 +150,11 @@ public class FrontController {
         loadFrontPage("/fxml/front_my_reservations.fxml");
     }
 
+    @FXML
+    private void goChatbot() {
+        loadFrontPage("/fxml/front_chatbot.fxml");
+    }
+
     private void loadFrontPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -145,10 +165,22 @@ public class FrontController {
             else if (ctrl instanceof FrontHotelsController) ((FrontHotelsController) ctrl).setFrontController(this);
             else if (ctrl instanceof FrontTransportController) ((FrontTransportController) ctrl).setFrontController(this);
             else if (ctrl instanceof FrontForumController) ((FrontForumController) ctrl).setFrontController(this);
+            else if (ctrl instanceof FrontNotificationsController) {
+                FrontNotificationsController nc = (FrontNotificationsController) ctrl;
+                nc.setFrontController(this);
+                nc.onNotificationsPageOpened();
+            }
+            else if (ctrl instanceof FrontChatbotController) ((FrontChatbotController) ctrl).setFrontController(this);
+            refreshNotificationBadge();
             contentStack.getChildren().setAll(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void goNotifications() {
+        loadFrontPage("/fxml/front_notifications.fxml");
     }
 
     @FXML
@@ -186,5 +218,22 @@ public class FrontController {
     public void refreshAvatar() {
         User user = SessionHolder.getCurrentUser();
         if (user != null) loadUserAvatar(user);
+    }
+
+    /** Refreshes the unread notification badge on the user avatar. */
+    public void refreshNotificationBadge() {
+        if (notificationBadge == null) return;
+        User user = SessionHolder.getCurrentUser();
+        if (user == null) {
+            notificationBadge.setVisible(false);
+            return;
+        }
+        try {
+            int count = notificationService.countUnreadByUserId(user.getIdUser());
+            notificationBadge.setVisible(count > 0);
+            notificationBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+        } catch (SQLException e) {
+            notificationBadge.setVisible(false);
+        }
     }
 }

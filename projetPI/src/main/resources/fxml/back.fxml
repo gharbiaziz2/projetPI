@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.BackController"
+            prefHeight="700" prefWidth="1200" stylesheets="@../css/back.css">
+    <left>
+        <VBox styleClass="sidebar" spacing="0" BorderPane.alignment="CENTER">
+            <HBox styleClass="sidebar-header" alignment="CENTER_LEFT" spacing="14">
+                <ImageView fx:id="sidebarLogo" fitHeight="42" fitWidth="42" preserveRatio="true" styleClass="sidebar-logo-img"/>
+                <VBox alignment="CENTER_LEFT" spacing="0">
+                    <Label text="CarthageVoyage" styleClass="sidebar-brand"/>
+                    <Label text="Admin" styleClass="sidebar-brand-sub"/>
+                </VBox>
+            </HBox>
+            <Separator styleClass="sidebar-separator"/>
+            <Label text="PRINCIPAL" styleClass="sidebar-section"/>
+            <Button fx:id="menuDashboard" text="  📊  Dashboard" styleClass="sidebar-menu-item active" onAction="#goDashboard"/>
+            <Label text="CONTENU" styleClass="sidebar-section"/>
+            <Button fx:id="menuVoyage" text="  Voyage" styleClass="sidebar-menu-item" onAction="#goVoyage"/>
+            <Button fx:id="menuActivite" text="  Activité" styleClass="sidebar-menu-item" onAction="#goActivite"/>
+            <Button fx:id="menuDestination" text="  Destination" styleClass="sidebar-menu-item" onAction="#goDestination"/>
+            <Button fx:id="menuHotel" text="  Hôtel" styleClass="sidebar-menu-item" onAction="#goHotel"/>
+            <Button fx:id="menuTransportLocal" text="  Transport" styleClass="sidebar-menu-item" onAction="#goTransportLocal"/>
+            <Button fx:id="menuForum" text="  Forum" styleClass="sidebar-menu-item" onAction="#goForum"/>
+            <Label text="RÉSERVATIONS" styleClass="sidebar-section"/>
+            <Button fx:id="menuReservationVoyage" text="  Résa. Voyage" styleClass="sidebar-menu-item" onAction="#goReservationVoyage"/>
+            <Button fx:id="menuReservationHotel" text="  Résa. Hôtel" styleClass="sidebar-menu-item" onAction="#goReservationHotel"/>
+            <Button fx:id="menuReservationTransport" text="  Résa. Transport" styleClass="sidebar-menu-item" onAction="#goReservationTransport"/>
+            <Button fx:id="menuReservationActivite" text="  Résa. Activité" styleClass="sidebar-menu-item" onAction="#goReservationActivite"/>
+            <Label text="UTILISATEURS" styleClass="sidebar-section"/>
+            <Button fx:id="menuUsers" text="  Users" styleClass="sidebar-menu-item" onAction="#goUsers"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Separator styleClass="sidebar-separator"/>
+            <Button fx:id="btnLogout" text="  ⎋  Déconnexion" styleClass="sidebar-menu-item" onAction="#logout"/>
+            <Label text="v 1.0" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.35); -fx-padding: 8 24 20 24;"/>
+        </VBox>
+    </left>
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="0">
+            <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="16">
+                <Button fx:id="btnMenu" styleClass="header-icon-btn" onAction="#toggleSidebar">
+                    <graphic>
+                        <Label text="☰" style="-fx-font-size: 20px; -fx-text-fill: #1a2332;"/>
+                    </graphic>
+                </Button>
+                <Label fx:id="headerTitle" text="Dashboard" styleClass="header-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button styleClass="header-icon-btn">
+                    <graphic>
+                        <Label text="🔍" style="-fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
+                <Button styleClass="header-icon-btn">
+                    <graphic>
+                        <Label text="🔔" style="-fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
+                <Button styleClass="header-icon-btn">
+                    <graphic>
+                        <Label text="👤" style="-fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
+            </HBox>
+            <StackPane fx:id="contentStack" VBox.vgrow="ALWAYS" styleClass="content-pane"/>
+        </VBox>
+    </center>
+</BorderPane>

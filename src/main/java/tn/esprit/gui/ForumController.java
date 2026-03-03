@@ -14,6 +14,7 @@ import tn.esprit.entities.Forum;
 import tn.esprit.entities.User;
 import tn.esprit.entities.Voyage;
 import tn.esprit.services.ForumServices;
+import tn.esprit.services.TranslationService;
 import tn.esprit.services.UserServices;
 import tn.esprit.services.VoyageServices;
 
@@ -32,8 +33,10 @@ public class ForumController {
     @FXML private TableColumn<Forum, String> colIdVoyage;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
+    @FXML private Button btnTranslate;
 
     private final ForumServices service = new ForumServices();
+    private final TranslationService translationService = new TranslationService();
     private final UserServices userService = new UserServices();
     private final VoyageServices voyageService = new VoyageServices();
     private final ObservableList<Forum> list = FXCollections.observableArrayList();
@@ -115,6 +118,33 @@ public class ForumController {
                 refresh();
             } catch (SQLException e) { showError("Erreur", "Modification impossible."); }
         }
+    }
+
+    @FXML private void onTranslate() {
+        Forum f = table.getSelectionModel().getSelectedItem();
+        if (f == null) { showError("Attention", "Sélectionnez un message."); return; }
+        String text = f.getContenu();
+        if (text == null || text.isBlank()) { showError("Attention", "Aucun contenu à traduire."); return; }
+        Dialog<String> d = new Dialog<>();
+        d.setTitle("Traduction");
+        d.setHeaderText("Choisir la langue cible");
+        ButtonType toEn = new ButtonType("Traduire en anglais", ButtonBar.ButtonData.OK_DONE);
+        ButtonType toFr = new ButtonType("Traduire en français", ButtonBar.ButtonData.OK_DONE);
+        d.getDialogPane().getButtonTypes().addAll(toEn, toFr, ButtonType.CANCEL);
+        d.setResultConverter(btn -> btn == toEn ? "en" : (btn == toFr ? "fr" : null));
+        d.showAndWait().ifPresent(target -> {
+            String source = "en".equals(target) ? "fr" : "en";
+            String translated = translationService.translate(text, source, target);
+            if (translated != null && !translated.isBlank()) {
+                Alert a = new Alert(Alert.AlertType.INFORMATION);
+                a.setTitle("Traduction");
+                a.setHeaderText("en".equals(target) ? "Traduction en anglais" : "Traduction en français");
+                a.setContentText(translated);
+                a.showAndWait();
+            } else {
+                showError("Traduction", "Impossible de traduire. Vérifiez votre connexion.");
+            }
+        });
     }
 
     @FXML private void onDelete() {

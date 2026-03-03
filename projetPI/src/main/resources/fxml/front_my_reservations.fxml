@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.MyReservationsController"
+            fitToWidth="true" styleClass="front-content my-reservations-scroll">
+    <VBox styleClass="my-reservations-root" spacing="28">
+        <VBox spacing="6">
+            <Label fx:id="pageTitle" text="Mes réservations" styleClass="my-reservations-title"/>
+            <Label fx:id="pageSubtitle" text="Retrouvez ici toutes vos réservations en un coup d'œil." styleClass="my-reservations-subtitle"/>
+        </VBox>
+
+        <VBox styleClass="my-reservations-section" spacing="12">
+            <Label text="Voyages" styleClass="my-reservations-section-title"/>
+            <VBox fx:id="voyageList" styleClass="my-reservations-card-list" spacing="10"/>
+        </VBox>
+
+        <VBox styleClass="my-reservations-section" spacing="12">
+            <Label text="Hôtels" styleClass="my-reservations-section-title"/>
+            <VBox fx:id="hotelList" styleClass="my-reservations-card-list" spacing="10"/>
+        </VBox>
+
+        <VBox styleClass="my-reservations-section" spacing="12">
+            <Label text="Transport" styleClass="my-reservations-section-title"/>
+            <VBox fx:id="transportList" styleClass="my-reservations-card-list" spacing="10"/>
+        </VBox>
+
+        <VBox styleClass="my-reservations-section" spacing="12">
+            <Label text="Activités" styleClass="my-reservations-section-title"/>
+            <VBox fx:id="activiteList" styleClass="my-reservations-card-list" spacing="10"/>
+        </VBox>
+    </VBox>
+</ScrollPane>
