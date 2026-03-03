@@ -128,6 +128,68 @@
     -fx-text-fill: #1a2332;
 }
 
+/* ========== Sentiment analysis cards ========== */
+.sentiment-card {
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0, 0, 6);
+}
+
+.sentiment-positive {
+    -fx-background-color: linear-gradient(to bottom right, #ecfdf5, #a7f3d0);
+    -fx-border-color: #059669;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+}
+
+.sentiment-negative {
+    -fx-background-color: linear-gradient(to bottom right, #fef2f2, #fecaca);
+    -fx-border-color: #dc2626;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+}
+
+.sentiment-neutral {
+    -fx-background-color: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+    -fx-border-color: #64748b;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+}
+
+.sentiment-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.sentiment-card-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.sentiment-card-score {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.sentiment-stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.sentiment-stat-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}
+
+.sentiment-card-reactions {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+}
+
 /* ========== Table / User page ========== */
 .table-toolbar {
     -fx-spacing: 12;
@@ -301,4 +363,55 @@
 .crud-dialog-buttons {
     -fx-spacing: 12;
     -fx-padding: 20 0 0 0;
+}
+
+/* ========== Dashboard charts ========== */
+.chart-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);
+}
+
+.chart-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-padding: 0 0 12 0;
+}
+
+.dashboard-pie-chart {
+    -fx-background-color: transparent;
+}
+
+.dashboard-pie-chart .chart-pie-label-line {
+    -fx-stroke: #64748b;
+    -fx-fill: #64748b;
+}
+
+.dashboard-pie-chart .chart-pie-label {
+    -fx-fill: #1a2332;
+    -fx-font-size: 12px;
+}
+
+.dashboard-bar-chart {
+    -fx-background-color: transparent;
+}
+
+.dashboard-bar-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.dashboard-bar-chart .axis {
+    -fx-tick-label-fill: #475569;
+    -fx-tick-mark-stroke: #e2e8f0;
+}
+
+.dashboard-bar-chart .axis-label {
+    -fx-text-fill: #64748b;
+}
+
+.dashboard-bar-chart .default-color0.chart-bar {
+    -fx-bar-fill: linear-gradient(to bottom, #3498db 0%, #2980b9 100%);
+    -fx-background-color: transparent;
 }

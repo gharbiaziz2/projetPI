@@ -13,10 +13,13 @@
     <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
         <TableView fx:id="table" styleClass="table-view" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colNom" text="Nom" prefWidth="150"/>
-                <TableColumn fx:id="colDescription" text="Description" prefWidth="200"/>
-                <TableColumn fx:id="colPrix" text="Prix" prefWidth="80"/>
-                <TableColumn fx:id="colDuree" text="Durée" prefWidth="80"/>
+                <TableColumn fx:id="colNom" text="Nom" prefWidth="120"/>
+                <TableColumn fx:id="colDescription" text="Description" prefWidth="180"/>
+                <TableColumn fx:id="colPrix" text="Prix" prefWidth="70"/>
+                <TableColumn fx:id="colDuree" text="Durée" prefWidth="60"/>
+                <TableColumn fx:id="colLatitude" text="Latitude" prefWidth="90"/>
+                <TableColumn fx:id="colLongitude" text="Longitude" prefWidth="90"/>
+                <TableColumn fx:id="colDate" text="Date" prefWidth="100"/>
             </columns>
         </TableView>
     </VBox>

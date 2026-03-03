@@ -2,11 +2,150 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.FrontVoyagesController"
-      spacing="20" styleClass="front-content">
-    <Label text="Voyages" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
-    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
-        <FlowPane fx:id="cardsContainer" hgap="20" vgap="20" styleClass="cards-flow"/>
-    </ScrollPane>
-</VBox>
+<!--
+    ROOT = ScrollPane (fitToWidth=true, vertical scroll only)
+      └─ VBox  (main page content)
+           ├─ Header + filter bar
+           └─ HBox (fill remaining height)
+                ├─ LEFT:  ScrollPane → FlowPane (voyage cards)   [hgrow=ALWAYS]
+                └─ RIGHT: VBox (camera + chatbot)                [fixed 320px]
+-->
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.gui.FrontVoyagesController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            maxWidth="Infinity" maxHeight="Infinity"
+            style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="16" fillWidth="true"
+          maxWidth="Infinity"
+          style="-fx-background-color: transparent;">
+        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+        <!-- ── Page title ──────────────────────────────────────── -->
+        <Label text="Voyages"
+               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+
+        <!-- ── Toggle filter bar button ───────────────────────── -->
+        <HBox alignment="CENTER_LEFT">
+            <ToggleButton fx:id="toggleFiltersBtn"
+                          text="🔍 Afficher/Masquer Filtres &amp; Caméra"
+                          onAction="#toggleFilters" selected="true"
+                          style="-fx-background-color: #0d6efd; -fx-text-fill: white;
+                                 -fx-font-weight: bold; -fx-padding: 8 15;
+                                 -fx-background-radius: 5; -fx-cursor: hand;"/>
+        </HBox>
+
+        <!-- ── Collapsible filter bar (search + price + image) ── -->
+        <VBox fx:id="filterContainer" spacing="8">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField"
+                           promptText="Recherche par nom, destination..."
+                           prefWidth="230"/>
+                <Button text="📷 Analyser Image" onAction="#importerImageEtChercher"
+                        style="-fx-background-color: #f39c12; -fx-text-fill: white;
+                               -fx-padding: 6 12; -fx-background-radius: 5; -fx-cursor: hand;
+                               -fx-font-weight: bold;"/>
+                <ImageView fx:id="imageDestination" fitHeight="30" fitWidth="30" preserveRatio="true"/>
+                <Label text="Prix Min:" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <TextField fx:id="minPriceField" promptText="Ex: 500" prefWidth="75"/>
+                <Label text="Prix Max:" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <TextField fx:id="maxPriceField" promptText="Ex: 5000" prefWidth="75"/>
+                <Button text="Filtrer" onAction="#filterVoyages"
+                        style="-fx-background-color: #1a237e; -fx-text-fill: white;
+                               -fx-padding: 6 14; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                <Button text="Réinitialiser" onAction="#resetFilter"
+                        style="-fx-background-color: #6c757d; -fx-text-fill: white;
+                               -fx-padding: 6 14; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                <ComboBox fx:id="currencyCombo" promptText="Devise"
+                          style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+
+        <!-- ── Main body: Cards (left) + Camera+Chatbot (right) ─ -->
+        <HBox spacing="16" VBox.vgrow="ALWAYS" fillHeight="true">
+
+            <!-- LEFT — voyage cards, scrollable -->
+            <ScrollPane HBox.hgrow="ALWAYS"
+                        fitToWidth="true"
+                        vbarPolicy="AS_NEEDED"
+                        hbarPolicy="NEVER"
+                        prefHeight="560" minHeight="400"
+                        style="-fx-background-color: transparent; -fx-background: transparent;">
+                <FlowPane fx:id="cardsContainer" hgap="20" vgap="20"
+                          styleClass="cards-flow"/>
+            </ScrollPane>
+
+            <!-- RIGHT — camera + chatbot, always fully visible -->
+            <VBox prefWidth="310" minWidth="290" maxWidth="310"
+                  spacing="12"
+                  style="-fx-background-color: #f8f9fa;
+                         -fx-border-color: #e0e0e0; -fx-border-width: 1;
+                         -fx-border-radius: 10; -fx-background-radius: 10;
+                         -fx-padding: 14;
+                         -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.08),6,0,0,2);">
+
+                <!-- Camera section -->
+                <Label text="📷 Recherche par Dessin"
+                       style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #1a2332;"/>
+
+                <StackPane fx:id="cameraPane"
+                           prefWidth="270" prefHeight="170"
+                           maxWidth="270" maxHeight="170"
+                           style="-fx-background-color: black; -fx-border-radius: 6; -fx-background-radius: 6;">
+                    <ImageView fx:id="cameraView" fitWidth="270" fitHeight="170" preserveRatio="true"/>
+                    <Canvas fx:id="drawingCanvas" width="270" height="170"/>
+                </StackPane>
+
+                <HBox spacing="8" alignment="CENTER">
+                    <ToggleButton fx:id="toggleCameraBtn" text="Démarrer Caméra"
+                                  onAction="#toggleCamera"
+                                  style="-fx-background-color: #1a237e; -fx-text-fill: white;
+                                         -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                    <Button text="Stop &amp; Chercher" onAction="#stopAndSearch"
+                            style="-fx-background-color: #28a745; -fx-text-fill: white;
+                                   -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                    <Button text="Effacer" onAction="#clearCanvas"
+                            style="-fx-background-color: #6c757d; -fx-text-fill: white;
+                                   -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Chatbot section -->
+                <Label text="✨ Assistant Voyage Gemini"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                <Label text="Posez-moi vos questions sur les destinations!"
+                       wrapText="true"
+                       style="-fx-font-size: 11px; -fx-text-fill: #666;"/>
+
+                <TextArea fx:id="aiChatArea"
+                          editable="false" wrapText="true"
+                          prefHeight="200" minHeight="160"
+                          VBox.vgrow="ALWAYS"
+                          style="-fx-control-inner-background: #ffffff;
+                                 -fx-font-family: 'Segoe UI', Arial; -fx-font-size: 13px;
+                                 -fx-border-color: #ddd; -fx-border-radius: 4;"/>
+
+                <HBox spacing="8">
+                    <TextField fx:id="aiPromptField"
+                               promptText="Votre question..."
+                               HBox.hgrow="ALWAYS"
+                               onAction="#askAI"
+                               style="-fx-background-radius: 15; -fx-border-radius: 15; -fx-padding: 5 10;"/>
+                    <Button fx:id="aiSendBtn" text="➤" onAction="#askAI"
+                            style="-fx-background-color: #1a237e; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-background-radius: 15;
+                                   -fx-cursor: hand; -fx-padding: 5 14; -fx-font-size: 14px;"/>
+                </HBox>
+            </VBox>
+
+        </HBox>
+    </VBox>
+</ScrollPane>
+

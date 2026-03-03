@@ -20,6 +20,7 @@
                 <TableColumn fx:id="colDateDepart" text="Date départ" prefWidth="100"/>
                 <TableColumn fx:id="colDateRetour" text="Date retour" prefWidth="100"/>
                 <TableColumn fx:id="colPrix" text="Prix" prefWidth="80"/>
+                <TableColumn fx:id="colNbrPlaces" text="Places" prefWidth="70"/>
                 <TableColumn fx:id="colIdVoyage" text="Voyage" prefWidth="70"/>
             </columns>
         </TableView>

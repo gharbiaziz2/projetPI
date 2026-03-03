@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.FrontChatbotController"
+     alignment="TOP_LEFT" spacing="16" styleClass="front-content">
+    <Label text="Assistant CarthageVoyage" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+    <Label text="Posez vos questions sur les voyages, activités et destinations en Tunisie." style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+    <ScrollPane fx:id="chatScroll" fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="chatbot-scroll">
+        <VBox fx:id="chatContainer" spacing="12" styleClass="chatbot-messages"/>
+    </ScrollPane>
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <TextField fx:id="inputField" promptText="Écrivez votre message..." HBox.hgrow="ALWAYS" styleClass="chatbot-input" onAction="#sendMessage"/>
+        <Button fx:id="sendBtn" text="Envoyer" styleClass="calendar-nav-btn" onAction="#sendMessage"/>
+    </HBox>
+</VBox>

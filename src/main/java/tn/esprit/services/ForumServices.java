@@ -61,4 +61,22 @@ public class ForumServices {
         }
         return list;
     }
+
+    public Forum getById(int idForum) throws SQLException {
+        String sql = "SELECT * FROM forum WHERE id_forum = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, idForum);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Timestamp ts = rs.getTimestamp("date_envoi");
+            return new Forum(
+                    rs.getInt("id_forum"),
+                    rs.getString("contenu"),
+                    ts != null ? ts.toLocalDateTime() : null,
+                    rs.getInt("id_user"),
+                    rs.getInt("id_voyage")
+            );
+        }
+        return null;
+    }
 }

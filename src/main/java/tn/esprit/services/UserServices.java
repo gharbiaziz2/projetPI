@@ -2,11 +2,13 @@ package tn.esprit.services;
 
 import tn.esprit.config.DBConnection;
 import tn.esprit.entities.User;
+import tn.esprit.util.PasswordUtil;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class UserServices {
     private Connection cnx;
@@ -16,12 +18,13 @@ public class UserServices {
     }
 
     public void ajouter(User u) throws SQLException {
+        String pwd = hashPasswordIfNeeded(u.getMotDePasse());
         String sql = "INSERT INTO `user` (nom, prenom, email, mot_de_passe, role, statut, date_creation, telephone, adresse, photo, bio) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, u.getNom());
         ps.setString(2, u.getPrenom());
         ps.setString(3, u.getEmail());
-        ps.setString(4, u.getMotDePasse());
+        ps.setString(4, pwd);
         ps.setString(5, u.getRole().name());
         ps.setString(6, u.getStatut().name());
         ps.setDate(7, Date.valueOf(u.getDateCreation()));
@@ -33,12 +36,13 @@ public class UserServices {
     }
 
     public void modifier(User u) throws SQLException {
+        String pwd = hashPasswordIfNeeded(u.getMotDePasse());
         String sql = "UPDATE `user` SET nom=?, prenom=?, email=?, mot_de_passe=?, role=?, statut=?, date_creation=?, telephone=?, adresse=?, photo=?, bio=? WHERE id_user=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, u.getNom());
         ps.setString(2, u.getPrenom());
         ps.setString(3, u.getEmail());
-        ps.setString(4, u.getMotDePasse());
+        ps.setString(4, pwd);
         ps.setString(5, u.getRole().name());
         ps.setString(6, u.getStatut().name());
         ps.setDate(7, Date.valueOf(u.getDateCreation()));
@@ -82,6 +86,16 @@ public class UserServices {
         return list;
     }
 
+    /**
+     * Hashes the password if it is plain text. Keeps [GOOGLE_OAUTH] and existing BCrypt hashes unchanged.
+     */
+    private String hashPasswordIfNeeded(String value) {
+        if (value == null || value.isBlank()) return value;
+        if (PasswordUtil.isGoogleOAuthSentinel(value)) return value;
+        if (PasswordUtil.isHashed(value)) return value;
+        return PasswordUtil.hash(value);
+    }
+
     /** Returns users with role GUIDE_TOURISTIQUE only (for voyage guide selection). */
     public List<User> getGuides() throws SQLException {
         List<User> all = afficher();
@@ -114,6 +128,44 @@ public class UserServices {
                 rs.getString("photo"),
                 rs.getString("bio")
         );
+    }
+
+    /**
+     * Finds user by email, or creates a new CLIENT user if not found (for Google OAuth sign-in).
+     * Uses a placeholder password for OAuth users since they won't log in with password.
+     */
+    public User findOrCreateFromGoogle(String email, String nom, String prenom, String photoUrl) throws SQLException {
+        User existing = findByEmail(email);
+        if (existing != null) return existing;
+        User nu = new User(0, nom, prenom, email, "[GOOGLE_OAUTH]", User.Role.CLIENT, User.Statut.ACTIVE,
+                LocalDate.now(), null, null, photoUrl, null);
+        ajouter(nu);
+        return findByEmail(email);
+    }
+
+    /**
+     * Resets user password to a temporary one. Returns the plain temp password if success, null otherwise.
+     * Caller should send it via SMS. Does nothing for Google OAuth users.
+     */
+    public String resetPasswordToTemp(String email) throws SQLException {
+        User u = findByEmail(email);
+        if (u == null) return null;
+        if (PasswordUtil.isGoogleOAuthSentinel(u.getMotDePasse())) return null;
+        String temp = generateTempPassword();
+        String sql = "UPDATE `user` SET mot_de_passe = ? WHERE id_user = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, PasswordUtil.hash(temp));
+        ps.setInt(2, u.getIdUser());
+        ps.executeUpdate();
+        return temp;
+    }
+
+    private static String generateTempPassword() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) sb.append(chars.charAt(r.nextInt(chars.length())));
+        return sb.toString();
     }
 
     /** Returns the user with the given email, or null if not found. */

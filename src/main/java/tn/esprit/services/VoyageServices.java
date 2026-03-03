@@ -16,7 +16,10 @@ public class VoyageServices {
         cnx = DBConnection.getInstance().getCnx();
     }
 
-    /** Throws IllegalArgumentException if idGuide is not a user with role GUIDE_TOURISTIQUE. */
+    /**
+     * Throws IllegalArgumentException if idGuide is not a user with role
+     * GUIDE_TOURISTIQUE.
+     */
     private void validateGuide(int idGuide) throws SQLException {
         User u = userServices.getById(idGuide);
         if (u == null || u.getRole() != User.Role.GUIDE_TOURISTIQUE) {
@@ -26,30 +29,32 @@ public class VoyageServices {
 
     public void ajouter(Voyage v) throws SQLException {
         validateGuide(v.getIdGuide());
-        String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide, image) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, v.getTypeVoyage());
+        ps.setString(1, v.getNomVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
         ps.setBigDecimal(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
+        ps.setString(8, v.getImage());
         ps.executeUpdate();
     }
 
     /** Inserts voyage and returns the generated id_voyage. */
     public int ajouterAndReturnId(Voyage v) throws SQLException {
         validateGuide(v.getIdGuide());
-        String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide, image) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, v.getTypeVoyage());
+        ps.setString(1, v.getNomVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
         ps.setBigDecimal(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
+        ps.setString(8, v.getImage());
         ps.executeUpdate();
         ResultSet rs = ps.getGeneratedKeys();
         if (rs.next()) {
@@ -65,16 +70,17 @@ public class VoyageServices {
 
     public void modifier(Voyage v) throws SQLException {
         validateGuide(v.getIdGuide());
-        String sql = "UPDATE voyage SET type_voyage=?, date_depart=?, date_retour=?, prix=?, places_disponibles=?, statut=?, id_guide=? WHERE id_voyage=?";
+        String sql = "UPDATE voyage SET type_voyage=?, date_depart=?, date_retour=?, prix=?, places_disponibles=?, statut=?, id_guide=?, image=? WHERE id_voyage=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, v.getTypeVoyage());
+        ps.setString(1, v.getNomVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
         ps.setBigDecimal(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
-        ps.setInt(8, v.getIdVoyage());
+        ps.setString(8, v.getImage());
+        ps.setInt(9, v.getIdVoyage());
         ps.executeUpdate();
     }
 
@@ -99,8 +105,8 @@ public class VoyageServices {
                     rs.getBigDecimal("prix"),
                     rs.getInt("places_disponibles"),
                     rs.getString("statut"),
-                    rs.getInt("id_guide")
-            );
+                    rs.getInt("id_guide"),
+                    rs.getString("image"));
             list.add(v);
         }
         return list;

@@ -27,9 +27,24 @@
             <TextField fx:id="emailField" promptText="Email" styleClass="voyage-input"/>
             <Label fx:id="emailError" styleClass="error-label" visible="false" managed="false"/>
             <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="voyage-input"/>
+            <HBox alignment="CENTER_RIGHT" styleClass="forgot-pwd-row">
+                <Button fx:id="forgotPasswordButton" text="Mot de passe oublié ?" styleClass="link-button" onAction="#onForgotPassword"/>
+            </HBox>
             <Label fx:id="passwordError" styleClass="error-label" visible="false" managed="false"/>
             <Label fx:id="loginError" styleClass="error-label" wrapText="true" visible="false" managed="false"/>
             <Button fx:id="loginButton" text="Se connecter" styleClass="voyage-button primary" onAction="#onLogin"/>
+            <HBox alignment="CENTER" spacing="8" styleClass="or-divider">
+                <Region HBox.hgrow="ALWAYS" styleClass="divider-line"/>
+                <Label text=" ou "/>
+                <Region HBox.hgrow="ALWAYS" styleClass="divider-line"/>
+            </HBox>
+            <Button fx:id="googleLoginButton" text="Se connecter avec Google" styleClass="voyage-button google-button" onAction="#onGoogleLogin"/>
+            <HBox alignment="CENTER" spacing="8" styleClass="or-divider">
+                <Region HBox.hgrow="ALWAYS" styleClass="divider-line"/>
+                <Label text=" ou "/>
+                <Region HBox.hgrow="ALWAYS" styleClass="divider-line"/>
+            </HBox>
+            <Button fx:id="faceRecognitionButton" text="Reconnaissance faciale" styleClass="voyage-button face-button" onAction="#onFaceRecognition"/>
             <HBox alignment="CENTER" spacing="8">
                 <Label text="Pas encore de compte ?"/>
                 <Button fx:id="goSignUpButton" text="S'inscrire" styleClass="link-button" onAction="#goToSignUp"/>
