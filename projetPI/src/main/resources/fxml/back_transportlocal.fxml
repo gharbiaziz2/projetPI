@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.TransportLocalController" spacing="16" styleClass="content-pane">
+    <HBox styleClass="table-toolbar" alignment="CENTER_LEFT" spacing="12">
+        <Button fx:id="btnAdd" text="+ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
+        <Button fx:id="btnEdit" text="Modifier" styleClass="btn-secondary" onAction="#onEdit"/>
+        <Button fx:id="btnDelete" text="Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="220"/>
+        <Button fx:id="btnFilter" text="Filtrage" styleClass="btn-filter" onAction="#onFilter"/>
+    </HBox>
+    <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
+        <TableView fx:id="table" styleClass="table-view" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colCompagnie" text="Compagnie" prefWidth="120"/>
+                <TableColumn fx:id="colTypeTransport" text="Type" prefWidth="90"/>
+                <TableColumn fx:id="colPaysDepart" text="Pays départ" prefWidth="100"/>
+                <TableColumn fx:id="colPaysArrivee" text="Pays arrivée" prefWidth="100"/>
+                <TableColumn fx:id="colDateDepart" text="Date départ" prefWidth="100"/>
+                <TableColumn fx:id="colDateRetour" text="Date retour" prefWidth="100"/>
+                <TableColumn fx:id="colPrix" text="Prix" prefWidth="80"/>
+                <TableColumn fx:id="colIdVoyage" text="Voyage" prefWidth="70"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

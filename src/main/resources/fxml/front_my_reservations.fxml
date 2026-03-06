@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.MyReservationsController"
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:id="mainScroll" fx:controller="tn.esprit.gui.MyReservationsController"
             fitToWidth="true" styleClass="front-content my-reservations-scroll">
     <VBox styleClass="my-reservations-root" spacing="28">
         <VBox spacing="6">

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.FrontController"
+            prefHeight="700" prefWidth="1100" stylesheets="@../css/front.css">
+    <top>
+        <HBox styleClass="front-navbar" alignment="CENTER_LEFT" spacing="16">
+            <Button fx:id="btnHome" text="Accueil" styleClass="nav-btn" onAction="#goHome"/>
+            <Button fx:id="btnVoyages" text="Voyages" styleClass="nav-btn" onAction="#goVoyages"/>
+            <Button fx:id="btnActivites" text="Activités" styleClass="nav-btn" onAction="#goActivites"/>
+            <Button fx:id="btnHotels" text="Hotels" styleClass="nav-btn" onAction="#goHotels"/>
+            <Button fx:id="btnTransport" text="Transport" styleClass="nav-btn" onAction="#goTransport"/>
+            <Button fx:id="btnForum" text="Forum" styleClass="nav-btn" onAction="#goForum"/>
+            <Button fx:id="btnMyReservations" text="Mes réservations" styleClass="nav-btn" onAction="#goMyReservations"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="userMenuButton" styleClass="user-menu-btn" onAction="#showUserMenu">
+                <graphic>
+                    <StackPane>
+                        <ImageView fx:id="userAvatar" fitHeight="36" fitWidth="36" preserveRatio="true" styleClass="user-avatar"/>
+                        <StackPane fx:id="avatarFallbackPane" styleClass="avatar-fallback" visible="false">
+                            <Label fx:id="userAvatarFallback" text="?" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                        </StackPane>
+                    </StackPane>
+                </graphic>
+            </Button>
+        </HBox>
+    </top>
+    <center>
+        <StackPane fx:id="contentStack" styleClass="front-content" BorderPane.alignment="CENTER"/>
+    </center>
+</BorderPane>

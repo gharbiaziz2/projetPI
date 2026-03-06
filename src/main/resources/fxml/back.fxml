@@ -6,9 +6,11 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.BackController"
-            prefHeight="700" prefWidth="1200" stylesheets="@../css/back.css">
+            maxWidth="Infinity" maxHeight="Infinity"
+            stylesheets="@../css/back.css">
     <left>
-        <VBox styleClass="sidebar" spacing="0" BorderPane.alignment="CENTER">
+        <!-- minWidth set so sidebar is never squashed; maxHeight=Infinity fills full window height -->
+        <VBox styleClass="sidebar" spacing="0" minWidth="220" maxHeight="Infinity" BorderPane.alignment="CENTER">
             <HBox styleClass="sidebar-header" alignment="CENTER_LEFT" spacing="14">
                 <ImageView fx:id="sidebarLogo" fitHeight="42" fitWidth="42" preserveRatio="true" styleClass="sidebar-logo-img"/>
                 <VBox alignment="CENTER_LEFT" spacing="0">
@@ -40,7 +42,8 @@
         </VBox>
     </left>
     <center>
-        <VBox alignment="TOP_CENTER" spacing="0">
+        <!-- maxWidth/maxHeight=Infinity + VBox.vgrow=ALWAYS on contentStack = fills all remaining space -->
+        <VBox alignment="TOP_CENTER" spacing="0" maxWidth="Infinity" maxHeight="Infinity">
             <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="16">
                 <Button fx:id="btnMenu" styleClass="header-icon-btn" onAction="#toggleSidebar">
                     <graphic>

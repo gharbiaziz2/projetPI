@@ -8,9 +8,13 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import tn.esprit.entities.Hotel;
+
+import java.io.File;
 import tn.esprit.gui.DialogStyleHelper;
 import tn.esprit.services.HotelServices;
 
@@ -24,6 +28,9 @@ public class HotelController {
     @FXML private TableColumn<Hotel, String> colPays;
     @FXML private TableColumn<Hotel, String> colVille;
     @FXML private TableColumn<Hotel, BigDecimal> colPrixNuit;
+    @FXML private TableColumn<Hotel, Double> colLongitude;
+    @FXML private TableColumn<Hotel, Double> colLatitude;
+    @FXML private TableColumn<Hotel, String> colImage;
     @FXML private TableColumn<Hotel, String> colDescription;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
@@ -40,6 +47,9 @@ public class HotelController {
         colPays.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPays()));
         colVille.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getVille()));
         colPrixNuit.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getPrixNuit()));
+        colLongitude.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getLongitude()));
+        colLatitude.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getLatitude()));
+        colImage.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getImage() != null ? c.getValue().getImage() : ""));
         colDescription.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDescription() != null ? c.getValue().getDescription() : ""));
         table.setItems(filteredList);
         if (searchField != null) searchField.textProperty().addListener((o, ov, nv) -> applyFilter());
@@ -129,17 +139,39 @@ public class HotelController {
         TextField pays = new TextField(h.getPays());
         TextField ville = new TextField(h.getVille());
         TextField prix = new TextField(h.getPrixNuit() != null ? h.getPrixNuit().toString() : "");
+        TextField longitude = new TextField(h.getLongitude() != null ? h.getLongitude().toString() : "");
+        TextField latitude = new TextField(h.getLatitude() != null ? h.getLatitude().toString() : "");
+        TextField image = new TextField(h.getImage());
+        image.setPromptText("Parcourir pour selectionner...");
+        Button browseImage = new Button("Parcourir");
+        browseImage.setOnAction(ev -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Choisir une image");
+            fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp"));
+            File f = fc.showOpenDialog(browseImage.getScene().getWindow());
+            if (f != null) image.setText(f.getAbsolutePath());
+        });
+        HBox imageBox = new HBox(8);
+        imageBox.getChildren().addAll(image, browseImage);
+        imageBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         TextField desc = new TextField(h.getDescription());
         GridPane g = DialogStyleHelper.buildGrid();
         DialogStyleHelper.addRow(g, 0, "Nom *", nom);
         DialogStyleHelper.addRow(g, 1, "Pays *", pays);
         DialogStyleHelper.addRow(g, 2, "Ville *", ville);
         DialogStyleHelper.addRow(g, 3, "Prix/nuit *", prix);
-        DialogStyleHelper.addRow(g, 4, "Description", desc);
+        DialogStyleHelper.addRow(g, 4, "Longitude", longitude);
+        DialogStyleHelper.addRow(g, 5, "Latitude", latitude);
+        DialogStyleHelper.addRow(g, 6, "Image", imageBox);
+        DialogStyleHelper.addRow(g, 7, "Description", desc);
         DialogStyleHelper.styleField(nom);
         DialogStyleHelper.styleField(pays);
         DialogStyleHelper.styleField(ville);
         DialogStyleHelper.styleField(prix);
+        DialogStyleHelper.styleField(longitude);
+        DialogStyleHelper.styleField(latitude);
+        DialogStyleHelper.styleField(image);
         DialogStyleHelper.styleField(desc);
         VBox content = new VBox(new Label(title), g);
         content.getStyleClass().add("crud-dialog-content");
@@ -159,6 +191,12 @@ public class HotelController {
             h.setPays(pays.getText().trim());
             h.setVille(ville.getText().trim());
             h.setPrixNuit(p);
+            Double lon = null, lat = null;
+            try { if (!longitude.getText().trim().isEmpty()) lon = Double.parseDouble(longitude.getText().trim()); } catch (Exception ignored) {}
+            try { if (!latitude.getText().trim().isEmpty()) lat = Double.parseDouble(latitude.getText().trim()); } catch (Exception ignored) {}
+            h.setLongitude(lon);
+            h.setLatitude(lat);
+            h.setImage(image.getText() != null && !image.getText().isBlank() ? image.getText().trim() : null);
             h.setDescription(desc.getText() != null && !desc.getText().isBlank() ? desc.getText().trim() : null);
             return h;
         });

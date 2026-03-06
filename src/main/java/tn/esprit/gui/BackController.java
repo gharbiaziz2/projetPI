@@ -58,26 +58,14 @@ public class BackController {
         setActiveMenu(menuDashboard);
         headerTitle.setText("Dashboard");
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/back_dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/back_dashboard.fxml"));
+            Parent root = loader.load();
+            Object ctrl = loader.getController();
+            if (ctrl != null && ctrl instanceof BackDashboardController) {
+                ((BackDashboardController) ctrl).refresh();
+            }
             contentStack.getChildren().setAll(root);
-            updateDashboardStats(root);
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateDashboardStats(Parent dash) {
-        try {
-            long total = userServices.afficher().size();
-            long clients = userServices.afficher().stream().filter(u -> u.getRole() == User.Role.CLIENT).count();
-            long guides = userServices.afficher().stream().filter(u -> u.getRole() == User.Role.GUIDE_TOURISTIQUE).count();
-            Node n1 = dash.lookup("#statUsers");
-            Node n2 = dash.lookup("#statClients");
-            Node n3 = dash.lookup("#statGuides");
-            if (n1 instanceof Label) ((Label) n1).setText(String.valueOf(total));
-            if (n2 instanceof Label) ((Label) n2).setText(String.valueOf(clients));
-            if (n3 instanceof Label) ((Label) n3).setText(String.valueOf(guides));
-        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

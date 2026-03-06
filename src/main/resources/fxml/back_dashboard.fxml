@@ -1,23 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="20" styleClass="content-pane">
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.BackDashboardController" fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;">
+    <VBox fx:id="dashboardContent" styleClass="content-pane" spacing="20">
     <Label text="Tableau de bord" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
     <GridPane hgap="20" vgap="20">
-        <VBox styleClass="dashboard-card" GridPane.columnIndex="0" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="0" GridPane.rowIndex="0" minWidth="180" minHeight="100">
             <Label text="UTILISATEURS" styleClass="dashboard-card-title"/>
             <Label fx:id="statUsers" text="0" styleClass="dashboard-card-value"/>
         </VBox>
-        <VBox styleClass="dashboard-card" GridPane.columnIndex="1" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="1" GridPane.rowIndex="0" minWidth="180" minHeight="100">
             <Label text="CLIENTS" styleClass="dashboard-card-title"/>
             <Label fx:id="statClients" text="0" styleClass="dashboard-card-value"/>
         </VBox>
-        <VBox styleClass="dashboard-card" GridPane.columnIndex="2" GridPane.rowIndex="0" minWidth="220" minHeight="120">
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="2" GridPane.rowIndex="0" minWidth="180" minHeight="100">
             <Label text="GUIDES" styleClass="dashboard-card-title"/>
             <Label fx:id="statGuides" text="0" styleClass="dashboard-card-value"/>
         </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="3" GridPane.rowIndex="0" minWidth="180" minHeight="100">
+            <Label text="VOYAGES" styleClass="dashboard-card-title"/>
+            <Label fx:id="statVoyages" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="4" GridPane.rowIndex="0" minWidth="180" minHeight="100">
+            <Label text="HÔTELS" styleClass="dashboard-card-title"/>
+            <Label fx:id="statHotels" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
     </GridPane>
-</VBox>
+    <GridPane hgap="20" vgap="20">
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="0" GridPane.rowIndex="0" minWidth="180" minHeight="100">
+            <Label text="TRANSPORT" styleClass="dashboard-card-title"/>
+            <Label fx:id="statTransport" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="1" GridPane.rowIndex="0" minWidth="180" minHeight="100">
+            <Label text="ACTIVITÉS" styleClass="dashboard-card-title"/>
+            <Label fx:id="statActivites" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+        <VBox styleClass="dashboard-card" GridPane.columnIndex="2" GridPane.rowIndex="0" minWidth="180" minHeight="100">
+            <Label text="RÉSERVATIONS" styleClass="dashboard-card-title"/>
+            <Label fx:id="statReservations" text="0" styleClass="dashboard-card-value"/>
+        </VBox>
+    </GridPane>
+
+    <Label text="Statistiques transport" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 16 0 8 0;"/>
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox styleClass="chart-card" prefWidth="380" minHeight="280">
+            <Label text="Répartition par type" styleClass="chart-title"/>
+            <StackPane fx:id="transportPieContainer" VBox.vgrow="ALWAYS" minHeight="240"/>
+        </VBox>
+        <VBox styleClass="chart-card" prefWidth="380" minHeight="280">
+            <Label text="Top compagnies (réservations)" styleClass="chart-title"/>
+            <StackPane fx:id="transportBarContainer" VBox.vgrow="ALWAYS" minHeight="240"/>
+        </VBox>
+    </HBox>
+
+    <Label text="Vue d'ensemble des modules" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 16 0 8 0;"/>
+    <VBox styleClass="chart-card" minHeight="260">
+        <Label text="Nombre d'éléments par module" styleClass="chart-title"/>
+        <StackPane fx:id="moduleBarContainer" VBox.vgrow="ALWAYS" minHeight="220"/>
+    </VBox>
+
+    <Label text="Répartition des réservations" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 16 0 8 0;"/>
+    <VBox styleClass="chart-card" prefWidth="380" minHeight="280">
+        <Label text="Par type (voyage, hôtel, transport, activité)" styleClass="chart-title"/>
+        <StackPane fx:id="reservationPieContainer" VBox.vgrow="ALWAYS" minHeight="240"/>
+    </VBox>
+
+    <Label text="Analyse sentimentale des voyages (forum)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332; -fx-padding: 16 0 8 0;"/>
+    <Label text="Basée sur les messages et commentaires du forum (IA Ninja) + likes/dislikes" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+    <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;">
+        <FlowPane fx:id="sentimentCardsContainer" hgap="16" vgap="16" style="-fx-padding: 4;"/>
+    </ScrollPane>
+    </VBox>
+</ScrollPane>
