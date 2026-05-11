@@ -4,6 +4,7 @@ import tn.esprit.config.DBConnection;
 import tn.esprit.entities.TransportLocal;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class TransportLocalServices {
         ps.setString(4, t.getPaysArrivee());
         ps.setDate(5, Date.valueOf(t.getDateDepart()));
         ps.setDate(6, Date.valueOf(t.getDateRetour()));
-        ps.setBigDecimal(7, t.getPrix());
+        ps.setDouble(7, t.getPrix());
         ps.setInt(8, t.getIdVoyage());
         ps.setInt(9, t.getNbrPlaces() > 0 ? t.getNbrPlaces() : 10);
         ps.executeUpdate();
@@ -38,7 +39,7 @@ public class TransportLocalServices {
         ps.setString(4, t.getPaysArrivee());
         ps.setDate(5, Date.valueOf(t.getDateDepart()));
         ps.setDate(6, Date.valueOf(t.getDateRetour()));
-        ps.setBigDecimal(7, t.getPrix());
+        ps.setDouble(7, t.getPrix());
         ps.setInt(8, t.getIdVoyage());
         ps.setInt(9, t.getNbrPlaces());
         ps.setInt(10, t.getIdTransport());
@@ -63,7 +64,6 @@ public class TransportLocalServices {
         return list;
     }
 
-    /** Returns transport options for the given voyage (excludes transports with 0 places). */
     public List<TransportLocal> getByVoyage(int idVoyage) throws SQLException {
         List<TransportLocal> list = new ArrayList<>();
         String sql = "SELECT * FROM transportlocal WHERE id_voyage = ? AND (nbr_places IS NULL OR nbr_places > 0)";
@@ -76,7 +76,6 @@ public class TransportLocalServices {
         return list;
     }
 
-    /** Returns transports linked to this voyage OR not linked to any voyage (id_voyage IS NULL or 0). Excludes transports with 0 places. */
     public List<TransportLocal> getByVoyageOrUnassigned(int idVoyage) throws SQLException {
         List<TransportLocal> list = new ArrayList<>();
         String sql = "SELECT * FROM transportlocal WHERE (id_voyage = ? OR id_voyage IS NULL OR id_voyage = 0) AND (nbr_places IS NULL OR nbr_places > 0)";
@@ -89,7 +88,6 @@ public class TransportLocalServices {
         return list;
     }
 
-    /** Returns all transports that have at least 1 place (for reservation fallback when voyage has no linked transports). */
     public List<TransportLocal> getAvailableTransports() throws SQLException {
         List<TransportLocal> list = new ArrayList<>();
         String sql = "SELECT * FROM transportlocal WHERE nbr_places IS NULL OR nbr_places > 0";
@@ -99,7 +97,6 @@ public class TransportLocalServices {
         return list;
     }
 
-    /** Decreases nbr_places by 1 when a user reserves this transport. Does nothing if already 0. */
     public void decrementerPlaces(int idTransport) throws SQLException {
         String sql = "UPDATE transportlocal SET nbr_places = GREATEST(0, COALESCE(nbr_places, 10) - 1) WHERE id_transport = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -117,15 +114,34 @@ public class TransportLocalServices {
         } catch (SQLException e) {
             nbrPlacesCol = 10;
         }
+        
+        // Handle type_transport safely
+        String typeStr = rs.getString("type_transport");
+        TransportLocal.TypeTransport typeTransport = TransportLocal.TypeTransport.VOL; // default
+        if (typeStr != null && !typeStr.trim().isEmpty()) {
+            try {
+                typeTransport = TransportLocal.TypeTransport.valueOf(typeStr.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid TypeTransport value: '" + typeStr + "', using default VOL");
+                typeTransport = TransportLocal.TypeTransport.VOL;
+            }
+        }
+        
+        // Handle dates safely
+        java.sql.Date sqlDateDepart = rs.getDate("date_depart");
+        java.sql.Date sqlDateRetour = rs.getDate("date_retour");
+        LocalDate dateDepart = (sqlDateDepart != null) ? sqlDateDepart.toLocalDate() : LocalDate.now();
+        LocalDate dateRetour = (sqlDateRetour != null) ? sqlDateRetour.toLocalDate() : LocalDate.now();
+        
         return new TransportLocal(
                 rs.getInt("id_transport"),
                 rs.getString("compagnie"),
-                TransportLocal.TypeTransport.valueOf(rs.getString("type_transport")),
+                typeTransport,
                 rs.getString("pays_depart"),
                 rs.getString("pays_arrivee"),
-                rs.getDate("date_depart").toLocalDate(),
-                rs.getDate("date_retour").toLocalDate(),
-                rs.getBigDecimal("prix"),
+                dateDepart,
+                dateRetour,
+                rs.getDouble("prix"),
                 idVoyageCol,
                 nbrPlacesCol
         );

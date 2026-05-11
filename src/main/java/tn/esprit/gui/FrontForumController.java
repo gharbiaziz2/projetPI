@@ -29,7 +29,7 @@ public class FrontForumController implements Initializable {
 
     @FXML private VBox postsContainer;
 
-    private FrontController frontController;
+
     private final ForumServices forumService = new ForumServices();
     private final ForumCommentServices commentService = new ForumCommentServices();
     private final ForumReactionService reactionService = new ForumReactionService();
@@ -41,6 +41,8 @@ public class FrontForumController implements Initializable {
     private Map<Integer, String> userNames = new HashMap<>();
     private Map<Integer, String> voyageLabels = new HashMap<>();
     private final TranslationService translationService = new TranslationService();
+
+    private FrontController frontController;
 
     public void setFrontController(FrontController c) { this.frontController = c; }
 

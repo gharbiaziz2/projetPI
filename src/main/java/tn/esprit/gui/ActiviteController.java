@@ -13,14 +13,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import tn.esprit.entities.Activite;
-import tn.esprit.gui.DialogStyleHelper;
+
 import tn.esprit.services.ActiviteServices;
 import tn.esprit.services.NotificationServices;
 
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
@@ -29,7 +28,7 @@ public class ActiviteController {
     @FXML private TableView<Activite> table;
     @FXML private TableColumn<Activite, String> colNom;
     @FXML private TableColumn<Activite, String> colDescription;
-    @FXML private TableColumn<Activite, BigDecimal> colPrix;
+    @FXML private TableColumn<Activite, Double> colPrix;
     @FXML private TableColumn<Activite, Number> colDuree;
     @FXML private TableColumn<Activite, String> colLatitude;
     @FXML private TableColumn<Activite, String> colLongitude;
@@ -41,7 +40,7 @@ public class ActiviteController {
     private final NotificationServices notificationService = new NotificationServices();
     private final ObservableList<Activite> list = FXCollections.observableArrayList();
     private final FilteredList<Activite> filteredList = new FilteredList<>(list, p -> true);
-    private BigDecimal filterPrixMax;
+    private Double filterPrixMax;
     private Integer filterDureeMin;
 
     @FXML
@@ -52,7 +51,7 @@ public class ActiviteController {
         colDuree.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDuree()));
         colLatitude.setCellValueFactory(c -> new SimpleStringProperty(formatCoord(c.getValue().getLatitude())));
         colLongitude.setCellValueFactory(c -> new SimpleStringProperty(formatCoord(c.getValue().getLongitude())));
-        colDate.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDate()));
+        colDate.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDateActivite()));
         table.setItems(filteredList);
         if (searchField != null) searchField.textProperty().addListener((o, ov, nv) -> applyFilter());
         refresh();
@@ -61,10 +60,10 @@ public class ActiviteController {
     private void applyFilter() {
         String q = searchField != null ? (searchField.getText() == null ? "" : searchField.getText()).trim().toLowerCase() : "";
         filteredList.setPredicate(a -> {
-            if (filterPrixMax != null && (a.getPrix() == null || a.getPrix().compareTo(filterPrixMax) > 0)) return false;
+            if (filterPrixMax != null && a.getPrix() > filterPrixMax) return false;
             if (filterDureeMin != null && a.getDuree() < filterDureeMin) return false;
             if (q.isEmpty()) return true;
-            return (a.getNom() != null && a.getNom().toLowerCase().contains(q)) || (a.getDescription() != null && a.getDescription().toLowerCase().contains(q)) || (a.getPrix() != null && a.getPrix().toString().contains(q));
+            return (a.getNom() != null && a.getNom().toLowerCase().contains(q)) || (a.getDescription() != null && a.getDescription().toLowerCase().contains(q)) || String.valueOf(a.getPrix()).contains(q);
         });
     }
 
@@ -87,7 +86,7 @@ public class ActiviteController {
         d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         d.setResultConverter(btn -> btn);
         if (d.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try { filterPrixMax = prixMaxF.getText() != null && !prixMaxF.getText().isBlank() ? new BigDecimal(prixMaxF.getText().trim()) : null; } catch (Exception e) { filterPrixMax = null; }
+            try { filterPrixMax = prixMaxF.getText() != null && !prixMaxF.getText().isBlank() ? Double.parseDouble(prixMaxF.getText().trim()) : null; } catch (Exception e) { filterPrixMax = null; }
             try { filterDureeMin = dureeMinF.getText() != null && !dureeMinF.getText().isBlank() ? Integer.parseInt(dureeMinF.getText().trim()) : null; } catch (Exception e) { filterDureeMin = null; }
             applyFilter();
         }
@@ -105,7 +104,7 @@ public class ActiviteController {
         if (showDialog(a, "Ajouter activite")) {
             try {
                 service.ajouter(a);
-                String msg = "Nouvelle activité : " + a.getNom() + (a.getPrix() != null ? " (" + a.getPrix() + " TND)" : "") + ".";
+                String msg = "Nouvelle activité : " + a.getNom() + (a.getPrix() > 0 ? " (" + a.getPrix() + " TND)" : "") + ".";
                 notificationService.notifyAllClients(msg);
                 refresh();
             } catch (SQLException e) { showError("Erreur", "Ajout impossible."); }
@@ -141,13 +140,13 @@ public class ActiviteController {
         DialogStyleHelper.styleDialogPane(d.getDialogPane());
         TextField nom = new TextField(a.getNom());
         TextField desc = new TextField(a.getDescription());
-        TextField prix = new TextField(a.getPrix() != null ? a.getPrix().toString() : "");
+        TextField prix = new TextField(a.getPrix() > 0 ? String.valueOf(a.getPrix()) : "");
         TextField duree = new TextField(a.getDuree() > 0 ? String.valueOf(a.getDuree()) : "");
         TextField latitude = new TextField(a.getLatitude() != null ? String.valueOf(a.getLatitude()) : "");
         latitude.setPromptText("ex: 36.8065");
         TextField longitude = new TextField(a.getLongitude() != null ? String.valueOf(a.getLongitude()) : "");
         longitude.setPromptText("ex: 10.1815");
-        DatePicker datePicker = new DatePicker(a.getDate());
+        DatePicker datePicker = new DatePicker(a.getDateActivite());
         datePicker.setPromptText("jj/mm/aaaa");
         TextField photo = new TextField(a.getPhoto() != null ? a.getPhoto() : "");
         photo.setPromptText("Chemin ou Parcourir...");
@@ -191,8 +190,8 @@ public class ActiviteController {
             if (nom.getText() == null || nom.getText().isBlank()) { showError("Validation", "Nom obligatoire."); return null; }
             if (prix.getText() == null || prix.getText().isBlank()) { showError("Validation", "Prix obligatoire."); return null; }
             if (duree.getText() == null || duree.getText().isBlank()) { showError("Validation", "Durée obligatoire."); return null; }
-            BigDecimal p; int du;
-            try { p = new BigDecimal(prix.getText().trim()); if (p.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
+            double p; int du;
+            try { p = Double.parseDouble(prix.getText().trim()); if (p < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
             try { du = Integer.parseInt(duree.getText().trim()); if (du <= 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Durée invalide (entier > 0)."); return null; }
             a.setNom(nom.getText().trim());
             a.setDescription(desc.getText() != null && !desc.getText().isBlank() ? desc.getText().trim() : null);
@@ -203,7 +202,7 @@ public class ActiviteController {
             try { if (longitude.getText() != null && !longitude.getText().isBlank()) lonVal = Double.parseDouble(longitude.getText().trim()); } catch (Exception ignored) {}
             a.setLatitude(latVal);
             a.setLongitude(lonVal);
-            a.setDate(datePicker.getValue());
+            a.setDateActivite(datePicker.getValue());
             a.setPhoto(photo.getText() != null && !photo.getText().isBlank() ? photo.getText().trim() : null);
             return a;
         });

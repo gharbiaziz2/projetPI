@@ -62,7 +62,7 @@ public class FrontActivitesController implements Initializable {
         }
         Label nameL = new Label(a.getNom() != null ? a.getNom() : "Activité");
         nameL.getStyleClass().add("card-title");
-        Label prixL = new Label("Prix: " + (a.getPrix() != null ? a.getPrix().toString() : "0") + " DT");
+        Label prixL = new Label("Prix: " + a.getPrix() + " DT");
         prixL.getStyleClass().add("card-price");
         Label dureeL = new Label("Durée: " + a.getDuree() + " min");
         dureeL.getStyleClass().add("card-dates");
@@ -71,7 +71,7 @@ public class FrontActivitesController implements Initializable {
         Label coordsL = new Label("📍 Lat/Lon: " + coords);
         coordsL.getStyleClass().add("card-statut");
         coordsL.setWrapText(true);
-        Label dateL = new Label("📅 Date: " + (a.getDate() != null ? a.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "—"));
+            Label dateL = new Label("📅 Date: " + (a.getDateActivite() != null ? a.getDateActivite().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "—"));
         dateL.getStyleClass().add("card-statut");
         String desc = a.getDescription();
         if (desc != null && desc.length() > 120) desc = desc.substring(0, 120) + "...";

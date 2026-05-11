@@ -1,6 +1,7 @@
 package tn.esprit.entities;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class User {
     private int idUser;
@@ -15,9 +16,14 @@ public class User {
     private String adresse;
     private String photo;
     private String bio;
+    private int badWordCount;
+    private String googleId;
+    private String googleAvatar;
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordExpiresAt;
 
     public enum Role { ADMIN, CLIENT, GUIDE_TOURISTIQUE }
-    public enum Statut { ACTIVE, DESACTIVE }
+    public enum Statut { ACTIVE, DESACTIVE, BANNED }
 
     public User() {
     }
@@ -63,4 +69,14 @@ public class User {
     public void setPhoto(String photo) { this.photo = photo; }
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+    public int getBadWordCount() { return badWordCount; }
+    public void setBadWordCount(int badWordCount) { this.badWordCount = badWordCount; }
+    public String getGoogleId() { return googleId; }
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
+    public String getGoogleAvatar() { return googleAvatar; }
+    public void setGoogleAvatar(String googleAvatar) { this.googleAvatar = googleAvatar; }
+    public String getResetPasswordToken() { return resetPasswordToken; }
+    public void setResetPasswordToken(String resetPasswordToken) { this.resetPasswordToken = resetPasswordToken; }
+    public LocalDateTime getResetPasswordExpiresAt() { return resetPasswordExpiresAt; }
+    public void setResetPasswordExpiresAt(LocalDateTime resetPasswordExpiresAt) { this.resetPasswordExpiresAt = resetPasswordExpiresAt; }
 }

@@ -37,7 +37,9 @@ public final class PasswordUtil {
         if (isGoogleOAuthSentinel(storedValue)) return false;
         if (isHashed(storedValue)) {
             try {
-                return BCrypt.checkpw(plainPassword, storedValue);
+                // ⚠️ Remplacer $2y$ par $2a$ pour compatibilité PHP → Java
+                String hashForJava = storedValue.replace("$2y$", "$2a$");
+                return BCrypt.checkpw(plainPassword, hashForJava);
             } catch (IllegalArgumentException e) {
                 return false;
             }

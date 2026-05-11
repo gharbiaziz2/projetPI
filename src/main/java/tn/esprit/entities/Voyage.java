@@ -1,26 +1,27 @@
 package tn.esprit.entities;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Voyage {
     private int idVoyage;
-    private String nomVoyage;
+    private String typeVoyage;
     private LocalDate dateDepart;
     private LocalDate dateRetour;
-    private BigDecimal prix;
+    private double prix;
     private int placesDisponibles;
     private String statut;
     private int idGuide;
     private String image;
+    private int idUserCreateur; // ID du client qui a proposé le voyage
+    private boolean estPropositionClient; // true si c'est une proposition de client
 
     public Voyage() {
     }
 
-    public Voyage(int idVoyage, String nomVoyage, LocalDate dateDepart, LocalDate dateRetour,
-            BigDecimal prix, int placesDisponibles, String statut, int idGuide, String image) {
+    public Voyage(int idVoyage, String typeVoyage, LocalDate dateDepart, LocalDate dateRetour,
+            double prix, int placesDisponibles, String statut, int idGuide, String image) {
         this.idVoyage = idVoyage;
-        this.nomVoyage = nomVoyage;
+        this.typeVoyage = typeVoyage;
         this.dateDepart = dateDepart;
         this.dateRetour = dateRetour;
         this.prix = prix;
@@ -28,6 +29,23 @@ public class Voyage {
         this.statut = statut;
         this.idGuide = idGuide;
         this.image = image;
+        this.estPropositionClient = false;
+    }
+
+    public Voyage(int idVoyage, String typeVoyage, LocalDate dateDepart, LocalDate dateRetour,
+            double prix, int placesDisponibles, String statut, int idGuide, String image,
+            int idUserCreateur, boolean estPropositionClient) {
+        this.idVoyage = idVoyage;
+        this.typeVoyage = typeVoyage;
+        this.dateDepart = dateDepart;
+        this.dateRetour = dateRetour;
+        this.prix = prix;
+        this.placesDisponibles = placesDisponibles;
+        this.statut = statut;
+        this.idGuide = idGuide;
+        this.image = image;
+        this.idUserCreateur = idUserCreateur;
+        this.estPropositionClient = estPropositionClient;
     }
 
     public int getIdVoyage() {
@@ -38,22 +56,24 @@ public class Voyage {
         this.idVoyage = idVoyage;
     }
 
-    public String getNomVoyage() {
-        return nomVoyage;
-    }
-
-    public void setNomVoyage(String nomVoyage) {
-        this.nomVoyage = nomVoyage;
-    }
-
-    /** @deprecated use getNomVoyage() */
     public String getTypeVoyage() {
-        return nomVoyage;
+        return typeVoyage;
     }
 
-    /** @deprecated use setNomVoyage() */
-    public void setTypeVoyage(String v) {
-        this.nomVoyage = v;
+    public void setTypeVoyage(String typeVoyage) {
+        this.typeVoyage = typeVoyage;
+    }
+
+    /** @deprecated use getTypeVoyage() */
+    @Deprecated
+    public String getNomVoyage() {
+        return typeVoyage;
+    }
+
+    /** @deprecated use setTypeVoyage() */
+    @Deprecated
+    public void setNomVoyage(String v) {
+        this.typeVoyage = v;
     }
 
     public LocalDate getDateDepart() {
@@ -72,11 +92,11 @@ public class Voyage {
         this.dateRetour = dateRetour;
     }
 
-    public BigDecimal getPrix() {
+    public double getPrix() {
         return prix;
     }
 
-    public void setPrix(BigDecimal prix) {
+    public void setPrix(double prix) {
         this.prix = prix;
     }
 
@@ -110,5 +130,21 @@ public class Voyage {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public int getIdUserCreateur() {
+        return idUserCreateur;
+    }
+
+    public void setIdUserCreateur(int idUserCreateur) {
+        this.idUserCreateur = idUserCreateur;
+    }
+
+    public boolean isEstPropositionClient() {
+        return estPropositionClient;
+    }
+
+    public void setEstPropositionClient(boolean estPropositionClient) {
+        this.estPropositionClient = estPropositionClient;
     }
 }

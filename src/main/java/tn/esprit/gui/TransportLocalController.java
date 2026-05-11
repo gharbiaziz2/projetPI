@@ -17,7 +17,6 @@ import tn.esprit.gui.DialogStyleHelper;
 import tn.esprit.services.TransportLocalServices;
 import tn.esprit.services.VoyageServices;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +32,7 @@ public class TransportLocalController {
     @FXML private TableColumn<TransportLocal, String> colPaysArrivee;
     @FXML private TableColumn<TransportLocal, String> colDateDepart;
     @FXML private TableColumn<TransportLocal, String> colDateRetour;
-    @FXML private TableColumn<TransportLocal, BigDecimal> colPrix;
+    @FXML private TableColumn<TransportLocal, Double> colPrix;
     @FXML private TableColumn<TransportLocal, Integer> colNbrPlaces;
     @FXML private TableColumn<TransportLocal, String> colIdVoyage;
     @FXML private TextField searchField;
@@ -158,7 +157,7 @@ public class TransportLocalController {
         TextField paysA = new TextField(t.getPaysArrivee());
         DatePicker dateD = new DatePicker(t.getDateDepart());
         DatePicker dateR = new DatePicker(t.getDateRetour());
-        TextField prix = new TextField(t.getPrix() != null ? t.getPrix().toString() : "");
+        TextField prix = new TextField(t.getPrix() > 0 ? String.valueOf(t.getPrix()) : "");
         TextField nbrPlacesF = new TextField(String.valueOf(t.getNbrPlaces() > 0 ? t.getNbrPlaces() : 10));
         ComboBox<Voyage> comboVoyage = new ComboBox<>();
         comboVoyage.setConverter(new StringConverter<Voyage>() {
@@ -206,8 +205,8 @@ public class TransportLocalController {
             if (dr == null) { showError("Validation", "Date retour obligatoire."); return null; }
             if (dr.isBefore(dd)) { showError("Validation", "Date retour après date départ."); return null; }
             if (prix.getText() == null || prix.getText().isBlank()) { showError("Validation", "Prix obligatoire."); return null; }
-            BigDecimal p;
-            try { p = new BigDecimal(prix.getText().trim()); if (p.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
+            double p;
+            try { p = Double.parseDouble(prix.getText().trim()); if (p < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
             int nbrPlacesVal = 10;
             try {
                 nbrPlacesVal = Integer.parseInt(nbrPlacesF.getText().trim());

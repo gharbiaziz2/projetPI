@@ -4,7 +4,6 @@ import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 
-import java.math.BigDecimal;
 import java.util.Properties;
 
 /**
@@ -15,7 +14,7 @@ public class StripeService {
     private final String secretKey;
     private final String successUrl;
     private final String cancelUrl;
-    private final BigDecimal tndToEurRate;
+    private final double tndToEurRate;
 
     public StripeService() {
         Properties props = new Properties();
@@ -26,11 +25,11 @@ public class StripeService {
         this.successUrl = props.getProperty("stripe.success.url", "").trim();
         this.cancelUrl = props.getProperty("stripe.cancel.url", "").trim();
         String rateStr = props.getProperty("stripe.tnd.to.eur.rate", "0.30").trim();
-        BigDecimal rate;
+        double rate;
         try {
-            rate = new BigDecimal(rateStr);
+            rate = Double.parseDouble(rateStr);
         } catch (NumberFormatException e) {
-            rate = new BigDecimal("0.30");
+            rate = 0.30;
         }
         this.tndToEurRate = rate;
     }
@@ -42,13 +41,13 @@ public class StripeService {
      * @param description Description for the payment (e.g. "Réservation voyage CarthageVoyage")
      * @return Checkout URL to open in browser, or null if config/API error
      */
-    public String createCheckoutSession(BigDecimal amountTnd, String description) {
+    public String createCheckoutSession(double amountTnd, String description) {
         if (secretKey.isEmpty()) return null;
-        if (amountTnd == null || amountTnd.compareTo(BigDecimal.ZERO) <= 0) return null;
+        if (amountTnd <= 0) return null;
         try {
             Stripe.apiKey = secretKey;
-            BigDecimal amountEur = amountTnd.multiply(tndToEurRate);
-            long amountCents = amountEur.multiply(BigDecimal.valueOf(100)).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+            double amountEur = amountTnd * tndToEurRate;
+            long amountCents = Math.round(amountEur * 100);
             if (amountCents < 50) amountCents = 50;
 
             SessionCreateParams.LineItem.PriceData.ProductData productData =

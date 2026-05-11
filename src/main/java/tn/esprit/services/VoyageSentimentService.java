@@ -29,7 +29,7 @@ public class VoyageSentimentService {
             List<Forum> allForums = forumService.afficher();
 
             for (Voyage v : voyages) {
-                VoyageSentimentStats stats = computeForVoyage(v.getIdVoyage(), v.getNomVoyage(), allForums);
+                VoyageSentimentStats stats = computeForVoyage(v.getIdVoyage(), v.getTypeVoyage(), allForums);
                 result.add(stats);
             }
         } catch (SQLException e) {

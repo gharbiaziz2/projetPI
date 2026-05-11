@@ -63,7 +63,7 @@ public class FrontTransportController implements Initializable {
         paysL.getStyleClass().add("card-dates");
         String dates = (t.getDateDepart() != null ? t.getDateDepart().format(D_FMT) : "?") + " - " + (t.getDateRetour() != null ? t.getDateRetour().format(D_FMT) : "?");
         Label datesL = new Label(dates);
-        Label prixL = new Label("Prix: " + (t.getPrix() != null ? t.getPrix().toString() : "0") + " DT");
+        Label prixL = new Label("Prix: " + t.getPrix() + " DT");
         prixL.getStyleClass().add("card-price");
         int places = t.getNbrPlaces();
         Label placesL = new Label(places + " place" + (places > 1 ? "s" : "") + " disponible" + (places > 1 ? "s" : ""));

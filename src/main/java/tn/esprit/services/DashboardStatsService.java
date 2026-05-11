@@ -101,7 +101,7 @@ public class DashboardStatsService {
         Map<String, Integer> m = new LinkedHashMap<>();
         String[][] defs = {
                 { "reservation_voyage", "voyage" },
-                { "reservationhotel", "hotel" },
+                { "reservation_chambre", "hotel" },
                 { "reservationtransport", "transport" },
                 { "reservation_activite", "activite" }
         };

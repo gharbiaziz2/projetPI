@@ -16,23 +16,27 @@ public class ForumServices {
     }
 
     public void ajouter(Forum f) throws SQLException {
-        String sql = "INSERT INTO forum (contenu, date_envoi, id_user, id_voyage) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO forum (contenu, date_envoi, id_user, id_voyage, titre, status) VALUES (?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, f.getContenu());
         ps.setTimestamp(2, Timestamp.valueOf(f.getDateEnvoi() != null ? f.getDateEnvoi() : LocalDateTime.now()));
         ps.setInt(3, f.getIdUser());
         ps.setInt(4, f.getIdVoyage());
+        ps.setString(5, f.getTitre());
+        ps.setString(6, f.getStatus() != null ? f.getStatus() : "ACTIVE");
         ps.executeUpdate();
     }
 
     public void modifier(Forum f) throws SQLException {
-        String sql = "UPDATE forum SET contenu=?, date_envoi=?, id_user=?, id_voyage=? WHERE id_forum=?";
+        String sql = "UPDATE forum SET contenu=?, date_envoi=?, id_user=?, id_voyage=?, titre=?, status=? WHERE id_forum=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, f.getContenu());
         ps.setTimestamp(2, f.getDateEnvoi() != null ? Timestamp.valueOf(f.getDateEnvoi()) : null);
         ps.setInt(3, f.getIdUser());
         ps.setInt(4, f.getIdVoyage());
-        ps.setInt(5, f.getIdForum());
+        ps.setString(5, f.getTitre());
+        ps.setString(6, f.getStatus());
+        ps.setInt(7, f.getIdForum());
         ps.executeUpdate();
     }
 
@@ -49,15 +53,7 @@ public class ForumServices {
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
-            Timestamp ts = rs.getTimestamp("date_envoi");
-            Forum f = new Forum(
-                    rs.getInt("id_forum"),
-                    rs.getString("contenu"),
-                    ts != null ? ts.toLocalDateTime() : null,
-                    rs.getInt("id_user"),
-                    rs.getInt("id_voyage")
-            );
-            list.add(f);
+            list.add(mapForum(rs));
         }
         return list;
     }
@@ -68,15 +64,21 @@ public class ForumServices {
         ps.setInt(1, idForum);
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
-            Timestamp ts = rs.getTimestamp("date_envoi");
-            return new Forum(
-                    rs.getInt("id_forum"),
-                    rs.getString("contenu"),
-                    ts != null ? ts.toLocalDateTime() : null,
-                    rs.getInt("id_user"),
-                    rs.getInt("id_voyage")
-            );
+            return mapForum(rs);
         }
         return null;
+    }
+
+    private Forum mapForum(ResultSet rs) throws SQLException {
+        Timestamp ts = rs.getTimestamp("date_envoi");
+        return new Forum(
+                rs.getInt("id_forum"),
+                rs.getString("contenu"),
+                ts != null ? ts.toLocalDateTime() : null,
+                rs.getInt("id_user"),
+                rs.getInt("id_voyage"),
+                rs.getString("titre"),
+                rs.getString("status")
+        );
     }
 }

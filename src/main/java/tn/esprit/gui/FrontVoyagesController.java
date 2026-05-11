@@ -35,7 +35,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import nu.pattern.OpenCV;
 
-import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -101,12 +100,13 @@ public class FrontVoyagesController implements Initializable {
     private double lastX = -1;
     private double lastY = -1;
 
-    private FrontController frontController;
+
     private final VoyageServices voyageService = new VoyageServices();
     private final UserServices userService = new UserServices();
     private final VoyageDestinationServices voyageDestinationService = new VoyageDestinationServices();
     private final ReservationVoyageServices reservationVoyageService = new ReservationVoyageServices();
     private final ReservationHotelServices reservationHotelService = new ReservationHotelServices();
+    private final HotelChambreServices hotelChambreService = new HotelChambreServices();
     private final ReservationActiviteServices reservationActiviteService = new ReservationActiviteServices();
     private final ReservationTransportServices reservationTransportService = new ReservationTransportServices();
     private final HotelServices hotelService = new HotelServices();
@@ -117,6 +117,8 @@ public class FrontVoyagesController implements Initializable {
     private final CountryInfoService countryInfoService = new CountryInfoService();
     private final StripeService stripeService = new StripeService();
     private final java.util.Set<String> searchTermsCache = new java.util.HashSet<>();
+
+    private FrontController frontController;
 
     private static final DateTimeFormatter D_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -187,8 +189,8 @@ public class FrontVoyagesController implements Initializable {
         try {
             List<Voyage> voyages = voyageService.afficher();
             for (Voyage v : voyages) {
-                if (v.getNomVoyage() != null)
-                    searchTermsCache.add(v.getNomVoyage());
+                if (v.getTypeVoyage() != null)
+                    searchTermsCache.add(v.getTypeVoyage());
                 if (v.getTypeVoyage() != null)
                     searchTermsCache.add(v.getTypeVoyage());
                 List<Destination> dests = voyageDestinationService.getDestinationsForVoyage(v.getIdVoyage());
@@ -277,15 +279,15 @@ public class FrontVoyagesController implements Initializable {
     public void loadCards() {
         cardsContainer.getChildren().clear();
 
-        BigDecimal minPrice = null;
-        BigDecimal maxPrice = null;
+        Double minPrice = null;
+        Double maxPrice = null;
 
         try {
             if (minPriceField != null && !minPriceField.getText().trim().isEmpty()) {
-                minPrice = new BigDecimal(minPriceField.getText().trim());
+                minPrice = Double.parseDouble(minPriceField.getText().trim());
             }
             if (maxPriceField != null && !maxPriceField.getText().trim().isEmpty()) {
-                maxPrice = new BigDecimal(maxPriceField.getText().trim());
+                maxPrice = Double.parseDouble(maxPriceField.getText().trim());
             }
         } catch (NumberFormatException e) {
             showError("Erreur de saisie", "Veuillez entrer des montants valides.");
@@ -293,20 +295,17 @@ public class FrontVoyagesController implements Initializable {
         }
 
         try {
-            final BigDecimal finalMin = minPrice;
-            final BigDecimal finalMax = maxPrice;
+            final Double finalMin = minPrice;
+            final Double finalMax = maxPrice;
 
             List<Voyage> voyages = voyageService.afficher().stream()
                     .filter(v -> "visible".equalsIgnoreCase(v.getStatut()))
                     .filter(v -> {
-                        if (v.getPrix() == null)
-                            return true; // keep if price is unknown unless strict filter needed
+                        double convertedPrice = v.getPrix() * currentExchangeRate;
 
-                        BigDecimal convertedPrice = v.getPrix().multiply(BigDecimal.valueOf(currentExchangeRate));
-
-                        if (finalMin != null && convertedPrice.compareTo(finalMin) < 0)
+                        if (finalMin != null && convertedPrice < finalMin)
                             return false;
-                        if (finalMax != null && convertedPrice.compareTo(finalMax) > 0)
+                        if (finalMax != null && convertedPrice > finalMax)
                             return false;
                         return true;
                     })
@@ -329,9 +328,9 @@ public class FrontVoyagesController implements Initializable {
                             && (isSingleChar ? v.getTypeVoyage().toLowerCase().startsWith(searchText)
                                     : v.getTypeVoyage().toLowerCase().contains(searchText)))
                         match = true;
-                    if (v.getNomVoyage() != null
-                            && (isSingleChar ? v.getNomVoyage().toLowerCase().startsWith(searchText)
-                                    : v.getNomVoyage().toLowerCase().contains(searchText)))
+                    if (v.getTypeVoyage() != null
+                            && (isSingleChar ? v.getTypeVoyage().toLowerCase().startsWith(searchText)
+                                    : v.getTypeVoyage().toLowerCase().contains(searchText)))
                         match = true;
                     for (Destination d : dests) {
                         if (d.getPaysDepart() != null
@@ -392,7 +391,7 @@ public class FrontVoyagesController implements Initializable {
         Label datesL = new Label(dates);
         datesL.getStyleClass().add("card-dates");
 
-        double prixV = v.getPrix() != null ? v.getPrix().doubleValue() : 0.0;
+        double prixV = v.getPrix();
         double prixFinal = prixV * currentExchangeRate;
         Label prixL = new Label(String.format(java.util.Locale.US, "Prix: %.2f %s", prixFinal, currentCurrency));
         prixL.getStyleClass().add("card-price");
@@ -632,13 +631,13 @@ public class FrontVoyagesController implements Initializable {
     }
 
     private void showBundleReservationAndPay(Voyage voyage, User user) {
-        BigDecimal total = voyage.getPrix() != null ? voyage.getPrix() : BigDecimal.ZERO;
+        double total = voyage.getPrix();
         Dialog<BundleResult> d = new Dialog<>();
         d.setTitle("Réservation complète");
         d.setHeaderText("Composez votre réservation et payez via Stripe");
         DialogStyleHelper.styleFrontDialogPane(d.getDialogPane());
 
-        Label voyageL = new Label("Voyage: " + voyage.getNomVoyage() + " — " + (voyage.getPrix() != null ? voyage.getPrix() + " DT" : "0 DT"));
+        Label voyageL = new Label("Voyage: " + voyage.getTypeVoyage() + " — " + voyage.getPrix() + " DT");
         voyageL.setWrapText(true);
 
         javafx.scene.control.DatePicker checkIn = new javafx.scene.control.DatePicker(LocalDate.now());
@@ -655,6 +654,30 @@ public class FrontVoyagesController implements Initializable {
         DialogStyleHelper.styleCombo(hotelCombo);
         hotelCombo.getSelectionModel().selectFirst();
 
+        // Chamber selection combo
+        ComboBox<HotelChambre> chamberCombo = new ComboBox<>();
+        chamberCombo.setConverter(new javafx.util.StringConverter<HotelChambre>() {
+            @Override public String toString(HotelChambre c) {
+                return c == null ? "(Aucune chambre)" : c.getNumeroChambre() + " - " + c.getTypeChambre() + " (" + c.getPrixChambre() + " DT)";
+            }
+            @Override public HotelChambre fromString(String s) { return null; }
+        });
+        DialogStyleHelper.styleCombo(chamberCombo);
+
+        // Update chambers when hotel changes
+        hotelCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            chamberCombo.getItems().clear();
+            if (newVal != null) {
+                try {
+                    List<HotelChambre> chambers = hotelChambreService.getAvailableByHotel(newVal.getIdHotel());
+                    chamberCombo.getItems().addAll(chambers);
+                    if (!chambers.isEmpty()) {
+                        chamberCombo.getSelectionModel().selectFirst();
+                    }
+                } catch (SQLException ignored) { }
+            }
+        });
+
         ListView<Activite> activiteList = new ListView<>();
         activiteList.getStyleClass().add("list-view");
         Label actPlaceholder = new Label("Aucune activité disponible");
@@ -669,7 +692,7 @@ public class FrontVoyagesController implements Initializable {
         activiteList.setCellFactory(lv -> new ListCell<Activite>() {
             @Override protected void updateItem(Activite a, boolean empty) {
                 super.updateItem(a, empty);
-                setText(a == null || empty ? "" : a.getNom() + " — " + (a.getPrix() != null ? a.getPrix() + " DT" : ""));
+                setText(a == null || empty ? "" : a.getNom() + " — " + (a.getPrix() > 0 ? a.getPrix() + " DT" : ""));
                 setStyle(null);
             }
         });
@@ -704,26 +727,27 @@ public class FrontVoyagesController implements Initializable {
         totalL.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
 
         java.util.function.Consumer<Void> updateTotal = v -> {
-            BigDecimal t = voyage.getPrix() != null ? voyage.getPrix() : BigDecimal.ZERO;
-            Hotel h = hotelCombo.getSelectionModel().getSelectedItem();
-            if (h != null && h.getPrixNuit() != null) {
+            double t = voyage.getPrix();
+            HotelChambre chamber = chamberCombo.getSelectionModel().getSelectedItem();
+            if (chamber != null) {
                 LocalDate ci = checkIn.getValue();
                 LocalDate co = checkOut.getValue();
                 if (ci != null && co != null && co.isAfter(ci)) {
-                    t = t.add(h.getPrixNuit().multiply(BigDecimal.valueOf(java.time.temporal.ChronoUnit.DAYS.between(ci, co))));
+                    t += chamber.getPrixChambre() * java.time.temporal.ChronoUnit.DAYS.between(ci, co);
                 }
             }
             for (Activite a : activiteList.getSelectionModel().getSelectedItems()) {
-                if (a.getPrix() != null) t = t.add(a.getPrix());
+                t += a.getPrix();
             }
             TransportLocal tr = transportCombo.getSelectionModel().getSelectedItem();
-            if (tr != null && tr.getPrix() != null) t = t.add(tr.getPrix());
+            if (tr != null) t += tr.getPrix();
             totalL.setText("Total: " + t + " DT");
         };
 
         checkIn.valueProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
         checkOut.valueProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
         hotelCombo.valueProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
+        chamberCombo.valueProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
         activiteList.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
         transportCombo.valueProperty().addListener((o, ov, nv) -> updateTotal.accept(null));
 
@@ -762,7 +786,8 @@ public class FrontVoyagesController implements Initializable {
         content.getChildren().addAll(
             voyageL,
             new Label("Hôtel (optionnel):"),
-            new HBox(10, hotelCombo, new Label("Check-in:"), checkIn, new Label("Check-out:"), checkOut),
+            new HBox(10, hotelCombo, new Label("Chambre:"), chamberCombo),
+            new HBox(10, new Label("Check-in:"), checkIn, new Label("Check-out:"), checkOut),
             new Label("Activités (optionnel):"),
             activiteList,
             new Label("Transport (optionnel):"),
@@ -773,32 +798,36 @@ public class FrontVoyagesController implements Initializable {
         d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         d.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return null;
-            BigDecimal t = voyage.getPrix() != null ? voyage.getPrix() : BigDecimal.ZERO;
+            double t = voyage.getPrix();
             Hotel h = hotelCombo.getSelectionModel().getSelectedItem();
-            ReservationHotel rh = null;
-            if (h != null && h.getPrixNuit() != null) {
-                LocalDate ci = checkIn.getValue();
-                LocalDate co = checkOut.getValue();
-                if (ci != null && co != null && co.isAfter(ci)) {
-                    BigDecimal hotelCost = h.getPrixNuit().multiply(BigDecimal.valueOf(java.time.temporal.ChronoUnit.DAYS.between(ci, co)));
-                    t = t.add(hotelCost);
-                    rh = new ReservationHotel();
-                    rh.setDateCheckin(ci);
-                    rh.setDateCheckout(co);
-                    rh.setPrixTotal(hotelCost);
-                    rh.setIdUser(user.getIdUser());
-                    rh.setIdHotel(h.getIdHotel());
+            ReservationChambre rh = null;
+            if (h != null) {
+                HotelChambre chamber = chamberCombo.getSelectionModel().getSelectedItem();
+                if (chamber != null) {
+                    LocalDate ci = checkIn.getValue();
+                    LocalDate co = checkOut.getValue();
+                    if (ci != null && co != null && co.isAfter(ci)) {
+                        double hotelCost = chamber.getPrixChambre() * java.time.temporal.ChronoUnit.DAYS.between(ci, co);
+                        t += hotelCost;
+                        rh = new ReservationChambre();
+                        rh.setDateDebut(ci);
+                        rh.setDateFin(co);
+                        rh.setMontantTotal(hotelCost);
+                        rh.setIdUser(user.getIdUser());
+                        rh.setIdChambre(chamber.getIdChambre());
+                        rh.setStatut("CONFIRMEE");
+                    }
                 }
             }
             List<Activite> selectedActivites = new ArrayList<>(activiteList.getSelectionModel().getSelectedItems());
             for (Activite a : selectedActivites) {
-                if (a.getPrix() != null) t = t.add(a.getPrix());
+                t += a.getPrix();
             }
             TransportLocal tr = transportCombo.getSelectionModel().getSelectedItem();
             ReservationTransport rtr = null;
             Integer idTransport = null;
-            if (tr != null && tr.getPrix() != null) {
-                t = t.add(tr.getPrix());
+            if (tr != null) {
+                t += tr.getPrix();
                 rtr = new ReservationTransport();
                 rtr.setDateReservation(transportDate.getValue() != null ? transportDate.getValue() : LocalDate.now());
                 rtr.setStatut(ReservationTransport.StatutReservation.CONFIRMEE);
@@ -810,11 +839,11 @@ public class FrontVoyagesController implements Initializable {
         });
 
         d.showAndWait().ifPresent(bundle -> {
-            if (bundle.total.compareTo(BigDecimal.ZERO) <= 0) {
+            if (bundle.total <= 0) {
                 showError("Erreur", "Le total doit être supérieur à 0.");
                 return;
             }
-            String url = stripeService.createCheckoutSession(bundle.total, "Réservation voyage " + voyage.getNomVoyage());
+            String url = stripeService.createCheckoutSession(bundle.total, "Réservation voyage " + voyage.getTypeVoyage());
             if (url == null) {
                 showError("Stripe", "Impossible d'initialiser le paiement. Vérifiez la configuration Stripe.");
                 return;
@@ -833,42 +862,93 @@ public class FrontVoyagesController implements Initializable {
                 rv.setIdUser(user.getIdUser());
                 rv.setIdVoyage(voyage.getIdVoyage());
                 int idRv = reservationVoyageService.ajouterAndReturnId(rv);
-                if (bundle.hotel != null) { reservationHotelService.ajouter(bundle.hotel); }
+                
+                // Réserver la chambre d'hôtel si sélectionnée
+                if (bundle.hotel != null) { 
+                    try {
+                        reservationHotelService.ajouter(bundle.hotel);
+                    } catch (SQLException e) {
+                        System.err.println("Erreur réservation hôtel: " + e.getMessage());
+                        // Non-bloquant - continuer avec les autres réservations
+                    }
+                }
+                
+                // Réserver les activités sélectionnées
+                int activitiesCount = 0;
                 for (Activite a : bundle.activites) {
-                    ReservationActivite ra = new ReservationActivite();
-                    ra.setDateReservation(LocalDate.now());
-                    ra.setStatut(ReservationTransport.StatutReservation.CONFIRMEE);
-                    ra.setMontantTotal(a.getPrix());
-                    ra.setIdUser(user.getIdUser());
-                    ra.setIdVoyage(voyage.getIdVoyage());
-                    ra.setIdActivite(a.getIdActivite());
-                    reservationActiviteService.ajouter(ra);
+                    try {
+                        ReservationActivite ra = new ReservationActivite();
+                        ra.setDateReservation(LocalDate.now());
+                        ra.setStatut(ReservationTransport.StatutReservation.CONFIRMEE);
+                        ra.setMontantTotal(a.getPrix());
+                        ra.setIdUser(user.getIdUser());
+                        ra.setIdVoyage(voyage.getIdVoyage());
+                        ra.setIdActivite(a.getIdActivite());
+                        reservationActiviteService.ajouter(ra);
+                        activitiesCount++;
+                    } catch (SQLException e) {
+                        System.err.println("Erreur réservation activité " + a.getNom() + ": " + e.getMessage());
+                        // Non-bloquant - continuer avec les autres activités
+                    }
                 }
+                
+                // Réserver le transport si sélectionné
                 if (bundle.transport != null && bundle.idTransport != null) {
-                    int idRt = reservationTransportService.ajouterAndReturnId(bundle.transport);
-                    reservationTransportTransportService.ajouter(new ReservationTransportTransport(idRt, bundle.idTransport));
-                    transportLocalService.decrementerPlaces(bundle.idTransport);
+                    try {
+                        int idRt = reservationTransportService.ajouterAndReturnId(bundle.transport);
+                        reservationTransportTransportService.ajouter(new ReservationTransportTransport(idRt, bundle.idTransport));
+                        transportLocalService.decrementerPlaces(bundle.idTransport);
+                    } catch (SQLException e) {
+                        System.err.println("Erreur réservation transport: " + e.getMessage());
+                        // Non-bloquant - continuer
+                    }
                 }
-                EmailConfirmationService.sendConfirmationEmail(user.getEmail(), user.getPrenom() + " " + user.getNom(), idRv);
-                showSuccess("Paiement initialisé. Complétez le paiement dans le navigateur.\nRéservation #" + idRv + " créée (EN ATTENTE). Un email a été envoyé à " + user.getEmail());
+                
+                // Envoyer confirmation email
+                try {
+                    EmailConfirmationService.sendConfirmationEmail(user.getEmail(), user.getPrenom() + " " + user.getNom(), idRv);
+                } catch (Exception e) {
+                    System.err.println("Erreur envoi email: " + e.getMessage());
+                }
+                
+                StringBuilder successMsg = new StringBuilder();
+                successMsg.append("✓ Réservation voyage créée #").append(idRv).append("\n");
+                successMsg.append("✓ Montant total: ").append(bundle.total).append(" DT\n");
+                if (bundle.hotel != null) {
+                    successMsg.append("✓ Chambre réservée\n");
+                }
+                if (activitiesCount > 0) {
+                    successMsg.append("✓ ").append(activitiesCount).append(" activité(s) réservée(s)\n");
+                }
+                if (bundle.transport != null) {
+                    successMsg.append("✓ Transport réservé\n");
+                }
+                successMsg.append("\nPaiement initialisé dans le navigateur.\n");
+                successMsg.append("Un email de confirmation a été envoyé à ").append(user.getEmail());
+                
+                showSuccess(successMsg.toString());
             } catch (SQLException ex) {
+                ex.printStackTrace();
                 if ("DUPLICATE_VOYAGE".equals(ex.getMessage())) {
                     showError("Déjà réservé", "Vous avez déjà réservé ce voyage.");
                 } else {
-                    showError("Erreur", "Impossible d'enregistrer les réservations.");
+                    showError("Erreur SQL", "Impossible d'enregistrer la réservation voyage:\n" + ex.getMessage());
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showError("Erreur", "Erreur lors de la réservation:\n" + ex.getMessage());
             }
         });
     }
 
     private static class BundleResult {
-        final BigDecimal total;
-        final ReservationHotel hotel;
+        final double total;
+        final ReservationChambre hotel;
         final List<Activite> activites;
         final ReservationTransport transport;
         final Integer idTransport;
 
-        BundleResult(BigDecimal total, ReservationHotel hotel, List<Activite> activites, ReservationTransport transport, Integer idTransport) {
+        BundleResult(double total, ReservationChambre hotel, List<Activite> activites, ReservationTransport transport, Integer idTransport) {
             this.total = total;
             this.hotel = hotel;
             this.activites = activites != null ? activites : new ArrayList<>();
@@ -877,6 +957,7 @@ public class FrontVoyagesController implements Initializable {
         }
     }
 
+    @SuppressWarnings("unused")
     private boolean confirmVoyageReservation(Voyage v, User user) {
         StringBuilder content = new StringBuilder();
         content.append("Voyage: ").append(v.getTypeVoyage()).append("\n");
@@ -891,7 +972,7 @@ public class FrontVoyagesController implements Initializable {
                     if (i > 0)
                         content.append(", ");
                     content.append(activites.get(i).getNom()).append(" (")
-                            .append(activites.get(i).getPrix() != null ? activites.get(i).getPrix() : "0")
+                            .append(activites.get(i).getPrix())
                             .append(" DT)");
                 }
                 content.append("\n");
@@ -907,12 +988,13 @@ public class FrontVoyagesController implements Initializable {
         return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 
+    @SuppressWarnings("unused")
     private void showHotelReservationPopup(User user) {
         try {
             List<Hotel> hotels = hotelService.afficher();
             if (hotels.isEmpty())
                 return;
-            Dialog<ReservationHotel> d = new Dialog<>();
+            Dialog<ReservationChambre> d = new Dialog<>();
             d.setTitle("Réservation hôtel (optionnel)");
             d.setHeaderText("Souhaitez-vous réserver un hôtel ?");
             DialogStyleHelper.styleFrontDialogPane(d.getDialogPane());
@@ -936,45 +1018,100 @@ public class FrontVoyagesController implements Initializable {
             DialogStyleHelper.styleCombo(hotelCombo);
             if (!hotels.isEmpty())
                 hotelCombo.getSelectionModel().selectFirst();
+            
+            // Chamber selection combo
+            ComboBox<HotelChambre> chamberCombo = new ComboBox<>();
+            chamberCombo.setConverter(new javafx.util.StringConverter<HotelChambre>() {
+                @Override public String toString(HotelChambre c) {
+                    return c == null ? "(Aucune chambre)" : c.getNumeroChambre() + " - " + c.getTypeChambre() + " (" + c.getPrixChambre() + " DT)";
+                }
+                @Override public HotelChambre fromString(String s) { return null; }
+            });
+            DialogStyleHelper.styleCombo(chamberCombo);
+            
+            // Update chambers when hotel changes
+            hotelCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+                chamberCombo.getItems().clear();
+                if (newVal != null) {
+                    try {
+                        List<HotelChambre> chambers = hotelChambreService.getAvailableByHotel(newVal.getIdHotel());
+                        chamberCombo.getItems().addAll(chambers);
+                        if (!chambers.isEmpty()) {
+                            chamberCombo.getSelectionModel().selectFirst();
+                        }
+                    } catch (SQLException ignored) { }
+                }
+            });
+            
+            // Trigger initial chamber load
+            if (!hotels.isEmpty()) {
+                try {
+                    List<HotelChambre> chambers = hotelChambreService.getAvailableByHotel(hotels.get(0).getIdHotel());
+                    chamberCombo.getItems().addAll(chambers);
+                    if (!chambers.isEmpty()) {
+                        chamberCombo.getSelectionModel().selectFirst();
+                    }
+                } catch (SQLException ignored) { }
+            }
+            
             GridPane g = DialogStyleHelper.buildGrid();
             DialogStyleHelper.addRow(g, 0, "Hôtel", hotelCombo);
-            DialogStyleHelper.addRow(g, 1, "Check-in", checkIn);
-            DialogStyleHelper.addRow(g, 2, "Check-out", checkOut);
+            DialogStyleHelper.addRow(g, 1, "Chambre", chamberCombo);
+            DialogStyleHelper.addRow(g, 2, "Début", checkIn);
+            DialogStyleHelper.addRow(g, 3, "Fin", checkOut);
             d.getDialogPane().setContent(g);
             d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
             d.setResultConverter(btn -> {
                 if (btn != ButtonType.OK)
                     return null;
                 Hotel h = hotelCombo.getSelectionModel().getSelectedItem();
-                if (h == null)
+                HotelChambre chamber = chamberCombo.getSelectionModel().getSelectedItem();
+                if (h == null || chamber == null)
                     return null;
                 LocalDate ci = checkIn.getValue();
                 LocalDate co = checkOut.getValue();
                 if (ci == null || co == null || !co.isAfter(ci))
                     return null;
-                ReservationHotel rh = new ReservationHotel();
-                rh.setDateCheckin(ci);
-                rh.setDateCheckout(co);
-                rh.setPrixTotal(h.getPrixNuit() != null
-                        ? h.getPrixNuit()
-                                .multiply(BigDecimal.valueOf(java.time.temporal.ChronoUnit.DAYS.between(ci, co)))
-                        : BigDecimal.ZERO);
+                ReservationChambre rh = new ReservationChambre();
+                rh.setDateDebut(ci);
+                rh.setDateFin(co);
+                long nights = java.time.temporal.ChronoUnit.DAYS.between(ci, co);
+                rh.setMontantTotal(chamber.getPrixChambre() * nights);
                 rh.setIdUser(user.getIdUser());
-                rh.setIdHotel(h.getIdHotel());
+                rh.setIdChambre(chamber.getIdChambre());
+                rh.setStatut("EN_ATTENTE");
                 return rh;
             });
             d.showAndWait().ifPresent(rh -> {
                 try {
+                    if (rh == null || rh.getIdChambre() == 0) {
+                        showError("Validation", "Veuillez sélectionner une chambre.");
+                        return;
+                    }
+                    if (rh.getDateDebut() == null || rh.getDateFin() == null) {
+                        showError("Validation", "Les dates sont requises.");
+                        return;
+                    }
                     reservationHotelService.ajouter(rh);
-                    showSuccess("Réservation hôtel enregistrée.");
+                    showSuccess("Réservation hôtel enregistrée.\nMontant: " + rh.getMontantTotal() + " DT");
                 } catch (SQLException e) {
-                    showError("Erreur", "Réservation hôtel impossible.");
+                    e.printStackTrace();
+                    showError("Erreur SQL", "Impossible d'enregistrer la réservation hôtel:\n" + e.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showError("Erreur", "Erreur lors de la réservation hôtel:\n" + e.getMessage());
                 }
             });
         } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Erreur SQL", "Impossible de charger les hôtels:\n" + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur", "Erreur lors de la réservation hôtel:\n" + e.getMessage());
         }
     }
 
+    @SuppressWarnings("unused")
     private void showActivityReservationPopup(Voyage voyage, User user) {
         try {
             List<Activite> activites = voyageActiviteService.getActivitesForVoyage(voyage.getIdVoyage());
@@ -992,7 +1129,7 @@ public class FrontVoyagesController implements Initializable {
                 protected void updateItem(Activite a, boolean empty) {
                     super.updateItem(a, empty);
                     setText(a == null || empty ? ""
-                            : a.getNom() + " - " + (a.getPrix() != null ? a.getPrix() + " DT" : ""));
+                            : a.getNom() + " - " + (a.getPrix() > 0 ? a.getPrix() + " DT" : "Gratuit"));
                 }
             });
             d.getDialogPane().setContent(listView);
@@ -1001,8 +1138,18 @@ public class FrontVoyagesController implements Initializable {
                     btn -> btn == ButtonType.OK ? new ArrayList<>(listView.getSelectionModel().getSelectedItems())
                             : null);
             d.showAndWait().ifPresent(selected -> {
+                if (selected == null || selected.isEmpty()) {
+                    return;
+                }
+                List<String> successMessages = new ArrayList<>();
+                List<String> errorMessages = new ArrayList<>();
+                
                 for (Activite a : selected) {
                     try {
+                        if (a.getIdActivite() <= 0) {
+                            errorMessages.add("Activité invalide: " + a.getNom());
+                            continue;
+                        }
                         ReservationActivite ra = new ReservationActivite();
                         ra.setDateReservation(LocalDate.now());
                         ra.setStatut(ReservationTransport.StatutReservation.CONFIRMEE);
@@ -1011,16 +1158,46 @@ public class FrontVoyagesController implements Initializable {
                         ra.setIdVoyage(voyage.getIdVoyage());
                         ra.setIdActivite(a.getIdActivite());
                         reservationActiviteService.ajouter(ra);
+                        successMessages.add(a.getNom());
                     } catch (SQLException ex) {
+                        ex.printStackTrace();
+                        errorMessages.add(a.getNom() + ": " + ex.getMessage());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        errorMessages.add(a.getNom() + ": " + ex.getMessage());
                     }
                 }
-                if (!selected.isEmpty())
-                    showSuccess("Réservation(s) activité(s) enregistrée(s).");
+                
+                if (!successMessages.isEmpty()) {
+                    StringBuilder msg = new StringBuilder("Réservation(s) activité(s) enregistrée(s):\n");
+                    for (String s : successMessages) {
+                        msg.append("✓ ").append(s).append("\n");
+                    }
+                    if (!errorMessages.isEmpty()) {
+                        msg.append("\nErreurs:\n");
+                        for (String e : errorMessages) {
+                            msg.append("✗ ").append(e).append("\n");
+                        }
+                    }
+                    showSuccess(msg.toString());
+                } else if (!errorMessages.isEmpty()) {
+                    StringBuilder msg = new StringBuilder("Erreurs lors de la réservation:\n");
+                    for (String e : errorMessages) {
+                        msg.append("✗ ").append(e).append("\n");
+                    }
+                    showError("Erreur", msg.toString());
+                }
             });
         } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Erreur SQL", "Impossible de charger les activités:\n" + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur", "Erreur lors de la réservation activités:\n" + e.getMessage());
         }
     }
 
+    @SuppressWarnings("unused")
     private void showTransportReservationPopup(Voyage voyage, User user) {
         try {
             // Show ALL transports so user always has options (voyage-linked or unassigned)

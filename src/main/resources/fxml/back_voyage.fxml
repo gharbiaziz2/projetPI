@@ -6,7 +6,10 @@
         <Button fx:id="btnAdd" text="+ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
         <Button fx:id="btnEdit" text="Modifier" styleClass="btn-secondary" onAction="#onEdit"/>
         <Button fx:id="btnDelete" text="Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
-        <Button fx:id="btnPromo" text="Promo Flash" styleClass="btn-warning" style="-fx-background-color: #ff9800; -fx-text-fill: white; -fx-font-weight: bold;" onAction="#handlePromoFlash"/>
+        <Separator orientation="VERTICAL" />
+        <Button fx:id="btnAppprove" text="✓ Approuver" styleClass="btn-success" style="-fx-background-color: #4caf50; -fx-text-fill: white;" onAction="#onApprouverProposition"/>
+        <Button fx:id="btnReject" text="✗ Refuser" styleClass="btn-warning" style="-fx-background-color: #ff9800; -fx-text-fill: white;" onAction="#onRefuserProposition"/>
+        <Button fx:id="btnPromo" text="Promo Flash" styleClass="btn-warning" style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;" onAction="#handlePromoFlash"/>
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="220"/>
         <RadioButton fx:id="rbAll" text="All" selected="true" onAction="#onFilter" styleClass="filter-radio">

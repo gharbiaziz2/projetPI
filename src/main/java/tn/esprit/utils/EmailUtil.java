@@ -4,7 +4,6 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.List;
 import java.util.Properties;
-import java.math.BigDecimal;
 
 public class EmailUtil {
 
@@ -15,7 +14,7 @@ public class EmailUtil {
     /**
      * Envoie la promotion de manière asynchrone (nouveau Thread).
      */
-    public static void envoyerPromoEmail(List<String> emailsClients, String destination, BigDecimal nouveauPrix) {
+    public static void envoyerPromoEmail(List<String> emailsClients, String destination, double nouveauPrix) {
         if (emailsClients == null || emailsClients.isEmpty()) {
             return;
         }

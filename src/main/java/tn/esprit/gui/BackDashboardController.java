@@ -107,7 +107,7 @@ public class BackDashboardController implements Initializable {
                             Alert alert = new Alert(Alert.AlertType.WARNING);
                             alert.setTitle("Alerte Yield Management");
                             alert.setHeaderText("Action Requise : Vente Flash Conseillée !");
-                            alert.setContentText("Le voyage '" + v.getNomVoyage() + "' part dans " + daysBetween + 
+                            alert.setContentText("Le voyage '" + v.getTypeVoyage() + "' part dans " + daysBetween + 
                                                " jour(s) et possède encore " + v.getPlacesDisponibles() + 
                                                " place(s) disponible(s).\n\n" +
                                                "Allez dans l'onglet Voyage et utilisez le bouton Promo Flash.");

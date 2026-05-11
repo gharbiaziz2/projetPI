@@ -1,13 +1,11 @@
 package tn.esprit.entities;
 
-import java.math.BigDecimal;
-
 public class Hotel {
     private int idHotel;
     private String nom;
     private String pays;
     private String ville;
-    private BigDecimal prixNuit;
+    private double prixNuit;
     private String description;
     private Double longitude;
     private Double latitude;
@@ -16,7 +14,7 @@ public class Hotel {
     public Hotel() {
     }
 
-    public Hotel(int idHotel, String nom, String pays, String ville, BigDecimal prixNuit, String description, Double longitude, Double latitude, String image) {
+    public Hotel(int idHotel, String nom, String pays, String ville, double prixNuit, String description, Double longitude, Double latitude, String image) {
         this.idHotel = idHotel;
         this.nom = nom;
         this.pays = pays;
@@ -36,8 +34,8 @@ public class Hotel {
     public void setPays(String pays) { this.pays = pays; }
     public String getVille() { return ville; }
     public void setVille(String ville) { this.ville = ville; }
-    public BigDecimal getPrixNuit() { return prixNuit; }
-    public void setPrixNuit(BigDecimal prixNuit) { this.prixNuit = prixNuit; }
+    public double getPrixNuit() { return prixNuit; }
+    public void setPrixNuit(double prixNuit) { this.prixNuit = prixNuit; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public Double getLongitude() { return longitude; }

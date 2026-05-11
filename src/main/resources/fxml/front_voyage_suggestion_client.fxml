@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" spacing="15.0" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.VoyageSuggestionClientController">
+    <children>
+        <Label text="Proposer un voyage personnalisé" textAlignment="CENTER">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+        <Label text="Remplissez le formulaire ci-dessous pour proposer votre voyage idéal à nos administrateurs" textAlignment="CENTER" wrapText="true" />
+        
+        <GridPane hgap="15.0" vgap="15.0">
+            <columnConstraints>
+                <javafx.scene.layout.ColumnConstraints hgrow="NEVER" prefWidth="150.0" />
+                <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <javafx.scene.layout.RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            </rowConstraints>
+            <children>
+                <Label text="Nom du voyage:" GridPane.rowIndex="0" />
+                <TextField fx:id="nomField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                
+                <Label text="Date départ:" GridPane.rowIndex="1" />
+                <DatePicker fx:id="dateDepField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                
+                <Label text="Date retour:" GridPane.rowIndex="2" />
+                <DatePicker fx:id="dateRetField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                
+                <Label text="Destination:" GridPane.rowIndex="3" />
+                <TextField fx:id="destinationField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                
+                <Label text="Ville départ:" GridPane.rowIndex="4" />
+                <TextField fx:id="villeDepField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                
+                <Label text="Budget (DT):" GridPane.rowIndex="5" />
+                <TextField fx:id="budgetField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            </children>
+        </GridPane>
+        
+        <Label text="Description du voyage:" />
+        <TextArea fx:id="descriptionArea" prefRowCount="4" wrapText="true" />
+        
+        <Label fx:id="messageLabel" text="" textAlignment="CENTER" wrapText="true" />
+        
+        <Button fx:id="submitButton" alignment="CENTER" maxWidth="200.0" mnemonicParsing="false" prefHeight="40.0" style="-fx-font-size: 14;" text="📤 Envoyer ma suggestion" />
+    </children>
+</VBox>

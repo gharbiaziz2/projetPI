@@ -10,10 +10,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import tn.esprit.entities.Activite;
 import tn.esprit.entities.Hotel;
-import tn.esprit.entities.ReservationHotel;
+import tn.esprit.entities.HotelChambre;
+import tn.esprit.entities.ReservationChambre;
 import tn.esprit.entities.User;
 import tn.esprit.services.ActiviteServices;
 import tn.esprit.services.FavoriteHotelService;
+import tn.esprit.services.HotelChambreServices;
 import tn.esprit.services.HotelServices;
 import tn.esprit.services.MapboxService;
 import tn.esprit.services.ReservationHotelServices;
@@ -21,9 +23,8 @@ import tn.esprit.services.ReservationHotelServices;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import tn.esprit.gui.DialogStyleHelper;
 
-import java.math.BigDecimal;
+
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -35,12 +36,15 @@ public class FrontHotelsController implements Initializable {
 
     @FXML private FlowPane cardsContainer;
 
-    private FrontController frontController;
+
     private final HotelServices hotelService = new HotelServices();
     private final ReservationHotelServices reservationHotelService = new ReservationHotelServices();
+    private final HotelChambreServices hotelChambreService = new HotelChambreServices();
     private final FavoriteHotelService favoriteHotelService = new FavoriteHotelService();
     private final ActiviteServices activiteService = new ActiviteServices();
     private final MapboxService mapboxService = new MapboxService();
+
+    private FrontController frontController;
 
     public void setFrontController(FrontController c) { this.frontController = c; }
 
@@ -107,7 +111,7 @@ public class FrontHotelsController implements Initializable {
             content.getChildren().add(coordsL);
         }
 
-        Label prixL = new Label((h.getPrixNuit() != null ? h.getPrixNuit().toString() : "0") + " DT / nuit");
+        Label prixL = new Label(h.getPrixNuit() + " DT / nuit");
         prixL.getStyleClass().add("card-price");
         content.getChildren().add(prixL);
 
@@ -181,45 +185,133 @@ public class FrontHotelsController implements Initializable {
             showError("Connexion requise", "Veuillez vous connecter pour reserver.");
             return;
         }
-        Dialog<ReservationHotel> d = new Dialog<>();
+        
+        // Get available chambers for this hotel
+        List<HotelChambre> chambers = new java.util.ArrayList<>();
+        try {
+            chambers = hotelChambreService.getAvailableByHotel(hotel.getIdHotel());
+        } catch (SQLException e) {
+            showError("Erreur", "Impossible de charger les chambres disponibles.");
+            return;
+        }
+        
+        if (chambers.isEmpty()) {
+            showError("Chambres indisponibles", "Aucune chambre disponible dans cet hôtel.");
+            return;
+        }
+        
+        Dialog<ReservationChambre> d = new Dialog<>();
         d.setTitle("Réservation hôtel");
-        d.setHeaderText("Choisissez vos dates");
+        d.setHeaderText("Choisissez vos dates et votre chambre");
         DialogStyleHelper.styleFrontDialogPane(d.getDialogPane());
         DatePicker checkIn = new DatePicker(LocalDate.now());
         DatePicker checkOut = new DatePicker(LocalDate.now().plusDays(1));
         DialogStyleHelper.styleDatePicker(checkIn);
         DialogStyleHelper.styleDatePicker(checkOut);
+        
+        ComboBox<HotelChambre> chamberCombo = new ComboBox<>();
+        chamberCombo.getItems().addAll(chambers);
+        chamberCombo.setCellFactory(lv -> new ListCell<HotelChambre>() {
+            @Override
+            protected void updateItem(HotelChambre chamber, boolean empty) {
+                super.updateItem(chamber, empty);
+                if (empty || chamber == null) {
+                    setText(null);
+                } else {
+                    setText(chamber.getNumeroChambre() + " - " + chamber.getTypeChambre() + " (" + chamber.getPrixChambre() + " DT)");
+                }
+            }
+        });
+        chamberCombo.setButtonCell(new ListCell<HotelChambre>() {
+            @Override
+            protected void updateItem(HotelChambre chamber, boolean empty) {
+                super.updateItem(chamber, empty);
+                if (empty || chamber == null) {
+                    setText(null);
+                } else {
+                    setText(chamber.getNumeroChambre() + " - " + chamber.getTypeChambre() + " (" + chamber.getPrixChambre() + " DT)");
+                }
+            }
+        });
+        if (!chambers.isEmpty()) {
+            chamberCombo.getSelectionModel().select(0);
+        }
+        
+        Label totalLabel = new Label("Total: 0 DT");
+        
+        // Update total when dates or chamber change
+        checkIn.valueProperty().addListener((obs, oldVal, newVal) -> updateTotal(checkIn, checkOut, chamberCombo, totalLabel));
+        checkOut.valueProperty().addListener((obs, oldVal, newVal) -> updateTotal(checkIn, checkOut, chamberCombo, totalLabel));
+        chamberCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateTotal(checkIn, checkOut, chamberCombo, totalLabel));
+        updateTotal(checkIn, checkOut, chamberCombo, totalLabel);
+        
         GridPane g = DialogStyleHelper.buildGrid();
         Label hotelLabel = new Label(hotel.getNom());
         hotelLabel.getStyleClass().add("crud-dialog-field");
         DialogStyleHelper.addRow(g, 0, "Hôtel", hotelLabel);
         DialogStyleHelper.addRow(g, 1, "Check-in", checkIn);
         DialogStyleHelper.addRow(g, 2, "Check-out", checkOut);
+        DialogStyleHelper.addRow(g, 3, "Chambre", chamberCombo);
+        DialogStyleHelper.addRow(g, 4, "Prix total", totalLabel);
+        
         d.getDialogPane().setContent(g);
         d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         d.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return null;
             LocalDate ci = checkIn.getValue();
             LocalDate co = checkOut.getValue();
-            if (ci == null || co == null) return null;
+            HotelChambre selected = chamberCombo.getSelectionModel().getSelectedItem();
+            if (ci == null || co == null || selected == null) return null;
             if (!co.isAfter(ci)) return null;
-            ReservationHotel rh = new ReservationHotel();
-            rh.setDateCheckin(ci);
-            rh.setDateCheckout(co);
+            ReservationChambre rh = new ReservationChambre();
+            rh.setDateDebut(ci);
+            rh.setDateFin(co);
             long nights = ChronoUnit.DAYS.between(ci, co);
-            rh.setPrixTotal(hotel.getPrixNuit() != null ? hotel.getPrixNuit().multiply(BigDecimal.valueOf(nights)) : BigDecimal.ZERO);
+            double totalPrice = selected.getPrixChambre() * nights;
+            rh.setMontantTotal(totalPrice);
             rh.setIdUser(user.getIdUser());
-            rh.setIdHotel(hotel.getIdHotel());
+            rh.setIdChambre(selected.getIdChambre());
+            rh.setStatut("EN_ATTENTE");
             return rh;
         });
         d.showAndWait().ifPresent(rh -> {
             try {
+                if (rh.getIdChambre() == 0) {
+                    showError("Validation", "Veuillez sélectionner une chambre.");
+                    return;
+                }
+                if (rh.getDateDebut() == null || rh.getDateFin() == null) {
+                    showError("Validation", "Les dates sont requises.");
+                    return;
+                }
+                if (rh.getIdUser() == 0) {
+                    showError("Validation", "Utilisateur non trouvé.");
+                    return;
+                }
                 reservationHotelService.ajouter(rh);
-                showSuccess("Reservation enregistree.");
+                showSuccess("Réservation de chambre enregistrée avec succès. Montant total: " + rh.getMontantTotal() + " DT");
             } catch (SQLException e) {
-                showError("Erreur", "Impossible d'enregistrer la reservation.");
+                e.printStackTrace();
+                showError("Erreur SQL", "Impossible d'enregistrer la réservation:\n" + e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
+                showError("Erreur", "Erreur lors de la réservation:\n" + e.getMessage());
             }
         });
+    }
+    
+    private void updateTotal(DatePicker checkIn, DatePicker checkOut, ComboBox<HotelChambre> chamberCombo, Label totalLabel) {
+        LocalDate ci = checkIn.getValue();
+        LocalDate co = checkOut.getValue();
+        HotelChambre selected = chamberCombo.getSelectionModel().getSelectedItem();
+        
+        if (ci != null && co != null && co.isAfter(ci) && selected != null) {
+            long nights = ChronoUnit.DAYS.between(ci, co);
+            double total = selected.getPrixChambre() * nights;
+            totalLabel.setText(String.format("Total: %.2f DT", total));
+        } else {
+            totalLabel.setText("Total: 0 DT");
+        }
     }
 
     private void showSuccess(String msg) {

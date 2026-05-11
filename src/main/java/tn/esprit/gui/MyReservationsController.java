@@ -10,7 +10,6 @@ import javafx.scene.layout.VBox;
 import tn.esprit.entities.*;
 import tn.esprit.services.*;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -96,16 +95,16 @@ public class MyReservationsController {
             if (rvList.isEmpty())
                 voyageList.getChildren().add(emptyHint("Aucune réservation voyage."));
 
-            List<ReservationHotel> rhList = rhService.afficher().stream().filter(r -> r.getIdUser() == idUser)
+            List<ReservationChambre> rhList = rhService.afficher().stream().filter(r -> r.getIdUser() == idUser)
                     .collect(Collectors.toList());
-            for (ReservationHotel r : rhList) {
-                String hotelName = hotelNames.getOrDefault(r.getIdHotel(), "Hôtel #" + r.getIdHotel());
-                hotelList.getChildren().add(buildCard("hotel", hotelName,
-                        "Check-in : " + (r.getDateCheckin() != null ? r.getDateCheckin().format(DATE_FMT) : "—")
-                                + "  ·  Check-out : "
-                                + (r.getDateCheckout() != null ? r.getDateCheckout().format(DATE_FMT) : "—"),
-                        null,
-                        formatMoney(r.getPrixTotal())));
+            for (ReservationChambre r : rhList) {
+                String chambreInfo = "Chambre #" + r.getIdChambre();
+                hotelList.getChildren().add(buildCard("hotel", chambreInfo,
+                        "Début : " + (r.getDateDebut() != null ? r.getDateDebut().format(DATE_FMT) : "—")
+                                + "  ·  Fin : "
+                                + (r.getDateFin() != null ? r.getDateFin().format(DATE_FMT) : "—"),
+                        "Statut : " + (r.getStatut() != null ? r.getStatut() : "—"),
+                        formatMoney(r.getMontantTotal())));
             }
             if (rhList.isEmpty())
                 hotelList.getChildren().add(emptyHint("Aucune réservation hôtel."));
@@ -252,8 +251,8 @@ public class MyReservationsController {
         });
     }
 
-    private String formatMoney(BigDecimal m) {
-        if (m == null)
+    private String formatMoney(double m) {
+        if (m <= 0)
             return "—";
         return m + " TND";
     }

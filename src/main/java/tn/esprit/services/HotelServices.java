@@ -20,7 +20,7 @@ public class HotelServices {
         ps.setString(1, h.getNom());
         ps.setString(2, h.getPays());
         ps.setString(3, h.getVille());
-        ps.setBigDecimal(4, h.getPrixNuit());
+        ps.setDouble(4, h.getPrixNuit());
         ps.setString(5, h.getDescription());
         ps.setObject(6, h.getLongitude());
         ps.setObject(7, h.getLatitude());
@@ -34,7 +34,7 @@ public class HotelServices {
         ps.setString(1, h.getNom());
         ps.setString(2, h.getPays());
         ps.setString(3, h.getVille());
-        ps.setBigDecimal(4, h.getPrixNuit());
+        ps.setDouble(4, h.getPrixNuit());
         ps.setString(5, h.getDescription());
         ps.setObject(6, h.getLongitude());
         ps.setObject(7, h.getLatitude());
@@ -61,7 +61,7 @@ public class HotelServices {
                     rs.getString("nom"),
                     rs.getString("pays"),
                     rs.getString("ville"),
-                    rs.getBigDecimal("prix_nuit"),
+                    rs.getDouble("prix_nuit"),
                     rs.getString("description"),
                     getDoubleOrNull(rs, "longitude"),
                     getDoubleOrNull(rs, "latitude"),

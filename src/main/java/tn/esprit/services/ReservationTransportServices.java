@@ -4,6 +4,7 @@ import tn.esprit.config.DBConnection;
 import tn.esprit.entities.ReservationTransport;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,23 +16,29 @@ public class ReservationTransportServices {
     }
 
     public void ajouter(ReservationTransport r) throws SQLException {
-        String sql = "INSERT INTO reservationtransport (date_reservation, statut, prix_total, id_user) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO reservationtransport (date_reservation, statut, prix_total, id_user, phone_number, reserved_places, hold_expires_at) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setDate(1, Date.valueOf(r.getDateReservation()));
         ps.setString(2, r.getStatut().name());
-        ps.setBigDecimal(3, r.getPrixTotal());
+        ps.setDouble(3, r.getPrixTotal());
         ps.setInt(4, r.getIdUser());
+        ps.setString(5, r.getPhoneNumber());
+        ps.setInt(6, r.getReservedPlaces());
+        ps.setTimestamp(7, r.getHoldExpiresAt() != null ? Timestamp.valueOf(r.getHoldExpiresAt()) : null);
         ps.executeUpdate();
     }
 
     /** Inserts and returns the generated id_reservation_transport. */
     public int ajouterAndReturnId(ReservationTransport r) throws SQLException {
-        String sql = "INSERT INTO reservationtransport (date_reservation, statut, prix_total, id_user) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO reservationtransport (date_reservation, statut, prix_total, id_user, phone_number, reserved_places, hold_expires_at) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setDate(1, Date.valueOf(r.getDateReservation()));
         ps.setString(2, r.getStatut().name());
-        ps.setBigDecimal(3, r.getPrixTotal());
+        ps.setDouble(3, r.getPrixTotal());
         ps.setInt(4, r.getIdUser());
+        ps.setString(5, r.getPhoneNumber());
+        ps.setInt(6, r.getReservedPlaces());
+        ps.setTimestamp(7, r.getHoldExpiresAt() != null ? Timestamp.valueOf(r.getHoldExpiresAt()) : null);
         ps.executeUpdate();
         ResultSet rs = ps.getGeneratedKeys();
         if (rs.next()) {
@@ -46,13 +53,16 @@ public class ReservationTransportServices {
     }
 
     public void modifier(ReservationTransport r) throws SQLException {
-        String sql = "UPDATE reservationtransport SET date_reservation=?, statut=?, prix_total=?, id_user=? WHERE id_reservation_transport=?";
+        String sql = "UPDATE reservationtransport SET date_reservation=?, statut=?, prix_total=?, id_user=?, phone_number=?, reserved_places=?, hold_expires_at=? WHERE id_reservation_transport=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setDate(1, Date.valueOf(r.getDateReservation()));
         ps.setString(2, r.getStatut().name());
-        ps.setBigDecimal(3, r.getPrixTotal());
+        ps.setDouble(3, r.getPrixTotal());
         ps.setInt(4, r.getIdUser());
-        ps.setInt(5, r.getIdReservationTransport());
+        ps.setString(5, r.getPhoneNumber());
+        ps.setInt(6, r.getReservedPlaces());
+        ps.setTimestamp(7, r.getHoldExpiresAt() != null ? Timestamp.valueOf(r.getHoldExpiresAt()) : null);
+        ps.setInt(8, r.getIdReservationTransport());
         ps.executeUpdate();
     }
 
@@ -69,12 +79,17 @@ public class ReservationTransportServices {
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
+            Timestamp holdTs = rs.getTimestamp("hold_expires_at");
+            LocalDateTime holdExpiresAt = holdTs != null ? holdTs.toLocalDateTime() : null;
             ReservationTransport r = new ReservationTransport(
                     rs.getInt("id_reservation_transport"),
                     rs.getDate("date_reservation").toLocalDate(),
                     ReservationTransport.StatutReservation.valueOf(rs.getString("statut")),
-                    rs.getBigDecimal("prix_total"),
-                    rs.getInt("id_user")
+                    rs.getDouble("prix_total"),
+                    rs.getInt("id_user"),
+                    rs.getString("phone_number"),
+                    rs.getInt("reserved_places"),
+                    holdExpiresAt
             );
             list.add(r);
         }

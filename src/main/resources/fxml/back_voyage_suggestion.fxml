@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.VoyageSuggestionController" spacing="16" styleClass="content-pane">
+    <HBox styleClass="table-toolbar" alignment="CENTER_LEFT" spacing="12">
+        <Button fx:id="btnDelete" text="Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="220"/>
+    </HBox>
+    <VBox styleClass="table-card" VBox.vgrow="ALWAYS">
+        <TableView fx:id="table" styleClass="table-view" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colNom" text="Nom complet" prefWidth="130"/>
+                <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+                <TableColumn fx:id="colDestination" text="Destination" prefWidth="110"/>
+                <TableColumn fx:id="colVilleDepart" text="Ville départ" prefWidth="100"/>
+                <TableColumn fx:id="colDate" text="Date souhaitée" prefWidth="100"/>
+                <TableColumn fx:id="colBudget" text="Budget" prefWidth="80"/>
+                <TableColumn fx:id="colMessage" text="Message" prefWidth="150"/>
+                <TableColumn fx:id="colStatut" text="Statut" prefWidth="90"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

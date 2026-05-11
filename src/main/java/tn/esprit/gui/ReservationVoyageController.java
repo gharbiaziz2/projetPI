@@ -13,14 +13,13 @@ import javafx.stage.Modality;
 import javafx.util.StringConverter;
 import tn.esprit.entities.ReservationTransport;
 import tn.esprit.entities.ReservationVoyage;
-import tn.esprit.gui.DialogStyleHelper;
+
 import tn.esprit.entities.User;
 import tn.esprit.entities.Voyage;
 import tn.esprit.services.ReservationVoyageServices;
 import tn.esprit.services.UserServices;
 import tn.esprit.services.VoyageServices;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,9 +31,11 @@ public class ReservationVoyageController {
     @FXML private TableView<ReservationVoyage> table;
     @FXML private TableColumn<ReservationVoyage, String> colDateReservation;
     @FXML private TableColumn<ReservationVoyage, String> colStatut;
-    @FXML private TableColumn<ReservationVoyage, BigDecimal> colMontant;
+    @FXML private TableColumn<ReservationVoyage, Double> colMontant;
     @FXML private TableColumn<ReservationVoyage, String> colUser;
     @FXML private TableColumn<ReservationVoyage, String> colVoyage;
+    @FXML private TableColumn<ReservationVoyage, String> colNumeroClient;
+    @FXML private TableColumn<ReservationVoyage, String> colBagageWeight;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
 
@@ -55,6 +56,8 @@ public class ReservationVoyageController {
         colMontant.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getMontantTotal()));
         colUser.setCellValueFactory(c -> new SimpleStringProperty(userDisplay.getOrDefault(c.getValue().getIdUser(), "")));
         colVoyage.setCellValueFactory(c -> new SimpleStringProperty(voyageDisplay.getOrDefault(c.getValue().getIdVoyage(), "")));
+        colNumeroClient.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNumeroClient() != null ? c.getValue().getNumeroClient() : ""));
+        colBagageWeight.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getBagageWeight() != null ? String.valueOf(c.getValue().getBagageWeight()) : ""));
         table.setItems(filteredList);
         if (searchField != null) searchField.textProperty().addListener((o, ov, nv) -> applyFilter());
         refresh();
@@ -65,7 +68,7 @@ public class ReservationVoyageController {
         filteredList.setPredicate(r -> {
             if (filterStatut != null && r.getStatut() != filterStatut) return false;
             if (q.isEmpty()) return true;
-            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || (r.getMontantTotal() != null && r.getMontantTotal().toString().contains(q)) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q) || voyageDisplay.getOrDefault(r.getIdVoyage(), "").toLowerCase().contains(q);
+            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || String.valueOf(r.getMontantTotal()).contains(q) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q) || voyageDisplay.getOrDefault(r.getIdVoyage(), "").toLowerCase().contains(q);
         });
     }
 
@@ -141,7 +144,7 @@ public class ReservationVoyageController {
         DatePicker dateResa = new DatePicker(r.getDateReservation());
         ComboBox<ReservationTransport.StatutReservation> statutCombo = new ComboBox<>(FXCollections.observableArrayList(ReservationTransport.StatutReservation.values()));
         statutCombo.getSelectionModel().select(r.getStatut());
-        TextField montant = new TextField(r.getMontantTotal() != null ? r.getMontantTotal().toString() : "");
+        TextField montant = new TextField(r.getMontantTotal() > 0 ? String.valueOf(r.getMontantTotal()) : "");
         ComboBox<User> comboUser = new ComboBox<>();
         ComboBox<Voyage> comboVoyage = new ComboBox<>();
         comboUser.setConverter(new StringConverter<User>() {
@@ -176,6 +179,10 @@ public class ReservationVoyageController {
         DialogStyleHelper.styleCombo(statutCombo);
         DialogStyleHelper.styleCombo(comboUser);
         DialogStyleHelper.styleCombo(comboVoyage);
+        TextField tfNumeroClient = new TextField(r.getNumeroClient() != null ? r.getNumeroClient() : "");
+        TextField tfBagageWeight = new TextField(r.getBagageWeight() != null ? String.valueOf(r.getBagageWeight()) : "");
+        DialogStyleHelper.styleField(tfNumeroClient);
+        DialogStyleHelper.styleField(tfBagageWeight);
         VBox content = new VBox(new Label(title), g);
         content.getStyleClass().add("crud-dialog-content");
         ((Label) content.getChildren().get(0)).getStyleClass().add("crud-dialog-title");
@@ -188,8 +195,8 @@ public class ReservationVoyageController {
             if (dr == null) { showError("Validation", "Date obligatoire."); return null; }
             if (statutCombo.getSelectionModel().getSelectedItem() == null) { showError("Validation", "Statut obligatoire."); return null; }
             if (montant.getText() == null || montant.getText().isBlank()) { showError("Validation", "Montant obligatoire."); return null; }
-            BigDecimal m;
-            try { m = new BigDecimal(montant.getText().trim()); if (m.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Montant invalide (nombre >= 0)."); return null; }
+            double m;
+            try { m = Double.parseDouble(montant.getText().trim()); if (m < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Montant invalide (nombre >= 0)."); return null; }
             User selUser = comboUser.getSelectionModel().getSelectedItem();
             Voyage selVoyage = comboVoyage.getSelectionModel().getSelectedItem();
             if (selUser == null) { showError("Validation", "User obligatoire."); return null; }
@@ -199,6 +206,8 @@ public class ReservationVoyageController {
             r.setMontantTotal(m);
             r.setIdUser(selUser.getIdUser());
             r.setIdVoyage(selVoyage.getIdVoyage());
+            r.setNumeroClient(tfNumeroClient.getText().isBlank() ? null : tfNumeroClient.getText().trim());
+            try { if (!tfBagageWeight.getText().isBlank()) r.setBagageWeight(Double.parseDouble(tfBagageWeight.getText().trim())); else r.setBagageWeight(null); } catch (Exception ignored) {}
             return r;
         });
         return d.showAndWait().orElse(null) != null;

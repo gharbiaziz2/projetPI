@@ -2,7 +2,7 @@ package tn.esprit.gui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -10,7 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
 import tn.esprit.services.UserServices;
@@ -29,17 +29,20 @@ public class BackController {
     @FXML private Button menuDestination;
     @FXML private Button menuForum;
     @FXML private Button menuHotel;
+    @FXML private Button menuChambre;
     @FXML private Button menuReservationHotel;
     @FXML private Button menuReservationTransport;
     @FXML private Button menuReservationActivite;
     @FXML private Button menuReservationVoyage;
     @FXML private Button menuTransportLocal;
     @FXML private Button menuVoyage;
+    @FXML private Button menuProgramme;
+    @FXML private Button menuSuggestion;
     @FXML private Label headerTitle;
     @FXML private StackPane contentStack;
     @FXML private Button btnLogout;
 
-    private final UserServices userServices = new UserServices();
+
 
     @FXML
     public void initialize() {
@@ -80,12 +83,15 @@ public class BackController {
     @FXML private void goDestination() { setActiveMenu(menuDestination); loadContent("/fxml/back_destination.fxml", "Destination", "refresh"); }
     @FXML private void goForum() { setActiveMenu(menuForum); loadContent("/fxml/back_forum.fxml", "Forum", "refresh"); }
     @FXML private void goHotel() { setActiveMenu(menuHotel); loadContent("/fxml/back_hotel.fxml", "Hotel", "refresh"); }
+    @FXML private void goChambre() { setActiveMenu(menuChambre); loadContent("/fxml/back_hotel_chambre.fxml", "Chambres", "refresh"); }
     @FXML private void goReservationHotel() { setActiveMenu(menuReservationHotel); loadContent("/fxml/back_reservationhotel.fxml", "Reservation Hotel", "refresh"); }
     @FXML private void goReservationTransport() { setActiveMenu(menuReservationTransport); loadContent("/fxml/back_reservationtransport.fxml", "Reservation Transport", "refresh"); }
     @FXML private void goReservationActivite() { setActiveMenu(menuReservationActivite); loadContent("/fxml/back_reservation_activite.fxml", "Reservation Activite", "refresh"); }
     @FXML private void goReservationVoyage() { setActiveMenu(menuReservationVoyage); loadContent("/fxml/back_reservation_voyage.fxml", "Reservation Voyage", "refresh"); }
     @FXML private void goTransportLocal() { setActiveMenu(menuTransportLocal); loadContent("/fxml/back_transportlocal.fxml", "Transport Local", "refresh"); }
     @FXML private void goVoyage() { setActiveMenu(menuVoyage); loadContent("/fxml/back_voyage.fxml", "Voyage", "refresh"); }
+    @FXML private void goProgramme() { setActiveMenu(menuProgramme); loadContent("/fxml/back_programme_voyage.fxml", "Programme Voyage", "refresh"); }
+    @FXML private void goSuggestion() { setActiveMenu(menuSuggestion); loadContent("/fxml/back_voyage_suggestion.fxml", "Suggestions Voyage", "refresh"); }
 
     private void loadContent(String fxmlPath, String title, String refreshMethod) {
         headerTitle.setText(title);
@@ -105,8 +111,8 @@ public class BackController {
     }
 
     private void setActiveMenu(Button active) {
-        Button[] all = { menuDashboard, menuUsers, menuActivite, menuDestination, menuForum, menuHotel,
-                menuReservationHotel, menuReservationTransport, menuReservationActivite, menuReservationVoyage, menuTransportLocal, menuVoyage };
+        Button[] all = { menuDashboard, menuUsers, menuActivite, menuDestination, menuForum, menuHotel, menuChambre,
+                menuReservationHotel, menuReservationTransport, menuReservationActivite, menuReservationVoyage, menuTransportLocal, menuVoyage, menuProgramme, menuSuggestion };
         for (Button b : all) if (b != null) b.getStyleClass().remove("active");
         if (active != null) active.getStyleClass().add("active");
     }

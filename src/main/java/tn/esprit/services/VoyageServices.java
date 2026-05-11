@@ -31,10 +31,10 @@ public class VoyageServices {
         validateGuide(v.getIdGuide());
         String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide, image) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, v.getNomVoyage());
+        ps.setString(1, v.getTypeVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
-        ps.setBigDecimal(4, v.getPrix());
+        ps.setDouble(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
@@ -47,10 +47,10 @@ public class VoyageServices {
         validateGuide(v.getIdGuide());
         String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide, image) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, v.getNomVoyage());
+        ps.setString(1, v.getTypeVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
-        ps.setBigDecimal(4, v.getPrix());
+        ps.setDouble(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
@@ -72,10 +72,10 @@ public class VoyageServices {
         validateGuide(v.getIdGuide());
         String sql = "UPDATE voyage SET type_voyage=?, date_depart=?, date_retour=?, prix=?, places_disponibles=?, statut=?, id_guide=?, image=? WHERE id_voyage=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, v.getNomVoyage());
+        ps.setString(1, v.getTypeVoyage());
         ps.setDate(2, Date.valueOf(v.getDateDepart()));
         ps.setDate(3, Date.valueOf(v.getDateRetour()));
-        ps.setBigDecimal(4, v.getPrix());
+        ps.setDouble(4, v.getPrix());
         ps.setInt(5, v.getPlacesDisponibles());
         ps.setString(6, v.getStatut());
         ps.setInt(7, v.getIdGuide());
@@ -102,7 +102,7 @@ public class VoyageServices {
                     rs.getString("type_voyage"),
                     rs.getDate("date_depart").toLocalDate(),
                     rs.getDate("date_retour").toLocalDate(),
-                    rs.getBigDecimal("prix"),
+                    rs.getDouble("prix"),
                     rs.getInt("places_disponibles"),
                     rs.getString("statut"),
                     rs.getInt("id_guide"),
@@ -124,7 +124,7 @@ public class VoyageServices {
             while (rs.next()) {
                 Voyage v = new Voyage();
                 v.setIdVoyage(rs.getInt("id_voyage"));
-                v.setNomVoyage(rs.getString("type_voyage"));
+                v.setTypeVoyage(rs.getString("type_voyage"));
                 // Conversion de java.sql.Date en LocalDate
                 if (rs.getDate("date_depart") != null) {
                     v.setDateDepart(rs.getDate("date_depart").toLocalDate());
@@ -132,8 +132,7 @@ public class VoyageServices {
                 if (rs.getDate("date_retour") != null) {
                     v.setDateRetour(rs.getDate("date_retour").toLocalDate());
                 }
-                // Récupération correcte du BigDecimal
-                v.setPrix(rs.getBigDecimal("prix"));
+                v.setPrix(rs.getDouble("prix"));
                 v.setPlacesDisponibles(rs.getInt("places_disponibles"));
                 v.setStatut(rs.getString("statut"));
                 v.setIdGuide(rs.getInt("id_guide"));
@@ -164,5 +163,88 @@ public class VoyageServices {
             }
         }
         return emails;
+    }
+
+    /**
+     * Permet aux clients de proposer un voyage (en attente d'approbation admin)
+     */
+    public int ajouterPropositionVoyage(Voyage v, int idUserClient) throws SQLException {
+        String sql = "INSERT INTO voyage (type_voyage, date_depart, date_retour, prix, places_disponibles, statut, id_guide, image, id_user_createur, est_proposition_client) " +
+                     "VALUES (?,?,?,?,?,?,?,?,?,?)";
+        PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setString(1, v.getTypeVoyage());
+        ps.setDate(2, Date.valueOf(v.getDateDepart()));
+        ps.setDate(3, Date.valueOf(v.getDateRetour()));
+        ps.setDouble(4, v.getPrix());
+        ps.setInt(5, v.getPlacesDisponibles());
+        ps.setString(6, "EN ATTENTE"); // Statut initial: EN ATTENTE
+        ps.setInt(7, 0); // No guide initially
+        ps.setString(8, v.getImage() != null ? v.getImage() : "");
+        ps.setInt(9, idUserClient);
+        ps.setBoolean(10, true);
+        ps.executeUpdate();
+        
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            int id = rs.getInt(1);
+            rs.close();
+            ps.close();
+            return id;
+        }
+        rs.close();
+        ps.close();
+        throw new SQLException("Impossible de créer la proposition de voyage");
+    }
+
+    /**
+     * Récupère toutes les propositions de voyage en attente d'approbation
+     */
+    public List<Voyage> obtenirPropositionsEnAttente() throws SQLException {
+        List<Voyage> list = new ArrayList<>();
+        String sql = "SELECT * FROM voyage WHERE est_proposition_client = true AND statut = 'EN ATTENTE'";
+        try (Statement st = cnx.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Voyage v = new Voyage(
+                        rs.getInt("id_voyage"),
+                        rs.getString("type_voyage"),
+                        rs.getDate("date_depart").toLocalDate(),
+                        rs.getDate("date_retour").toLocalDate(),
+                        rs.getDouble("prix"),
+                        rs.getInt("places_disponibles"),
+                        rs.getString("statut"),
+                        rs.getInt("id_guide"),
+                        rs.getString("image"),
+                        rs.getInt("id_user_createur"),
+                        rs.getBoolean("est_proposition_client")
+                );
+                list.add(v);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Accepte une proposition de voyage (change le statut à ACCEPTEE et assigna un guide)
+     */
+    public void accepterPropositionVoyage(int idVoyage, int idGuide) throws SQLException {
+        validateGuide(idGuide);
+        String sql = "UPDATE voyage SET statut = 'ACCEPTEE', id_guide = ? WHERE id_voyage = ? AND est_proposition_client = true";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, idGuide);
+        ps.setInt(2, idVoyage);
+        ps.executeUpdate();
+        ps.close();
+    }
+
+    /**
+     * Refuse une proposition de voyage
+     */
+    public void refuserPropositionVoyage(int idVoyage) throws SQLException {
+        String sql = "UPDATE voyage SET statut = 'REFUSEE' WHERE id_voyage = ? AND est_proposition_client = true";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, idVoyage);
+        ps.executeUpdate();
+        ps.close();
     }
 }

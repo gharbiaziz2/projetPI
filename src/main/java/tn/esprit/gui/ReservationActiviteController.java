@@ -14,7 +14,7 @@ import javafx.util.StringConverter;
 import tn.esprit.entities.Activite;
 import tn.esprit.entities.ReservationActivite;
 import tn.esprit.entities.ReservationTransport;
-import tn.esprit.gui.DialogStyleHelper;
+
 import tn.esprit.entities.User;
 import tn.esprit.entities.Voyage;
 import tn.esprit.services.ActiviteServices;
@@ -22,7 +22,6 @@ import tn.esprit.services.ReservationActiviteServices;
 import tn.esprit.services.UserServices;
 import tn.esprit.services.VoyageServices;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +33,7 @@ public class ReservationActiviteController {
     @FXML private TableView<ReservationActivite> table;
     @FXML private TableColumn<ReservationActivite, String> colDateReservation;
     @FXML private TableColumn<ReservationActivite, String> colStatut;
-    @FXML private TableColumn<ReservationActivite, BigDecimal> colMontant;
+    @FXML private TableColumn<ReservationActivite, Double> colMontant;
     @FXML private TableColumn<ReservationActivite, String> colUser;
     @FXML private TableColumn<ReservationActivite, String> colVoyage;
     @FXML private TableColumn<ReservationActivite, String> colActivite;
@@ -71,7 +70,7 @@ public class ReservationActiviteController {
         filteredList.setPredicate(r -> {
             if (filterStatut != null && r.getStatut() != filterStatut) return false;
             if (q.isEmpty()) return true;
-            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || (r.getMontantTotal() != null && r.getMontantTotal().toString().contains(q)) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q) || voyageDisplay.getOrDefault(r.getIdVoyage(), "").toLowerCase().contains(q) || activiteDisplay.getOrDefault(r.getIdActivite(), "").toLowerCase().contains(q);
+            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || String.valueOf(r.getMontantTotal()).contains(q) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q) || voyageDisplay.getOrDefault(r.getIdVoyage(), "").toLowerCase().contains(q) || activiteDisplay.getOrDefault(r.getIdActivite(), "").toLowerCase().contains(q);
         });
     }
 
@@ -149,7 +148,7 @@ public class ReservationActiviteController {
         DatePicker dateResa = new DatePicker(r.getDateReservation());
         ComboBox<ReservationTransport.StatutReservation> statutCombo = new ComboBox<>(FXCollections.observableArrayList(ReservationTransport.StatutReservation.values()));
         statutCombo.getSelectionModel().select(r.getStatut());
-        TextField montant = new TextField(r.getMontantTotal() != null ? r.getMontantTotal().toString() : "");
+        TextField montant = new TextField(r.getMontantTotal() > 0 ? String.valueOf(r.getMontantTotal()) : "");
         ComboBox<User> comboUser = new ComboBox<>();
         ComboBox<Voyage> comboVoyage = new ComboBox<>();
         ComboBox<Activite> comboActivite = new ComboBox<>();
@@ -206,8 +205,8 @@ public class ReservationActiviteController {
             if (dr == null) { showError("Validation", "Date obligatoire."); return null; }
             if (statutCombo.getSelectionModel().getSelectedItem() == null) { showError("Validation", "Statut obligatoire."); return null; }
             if (montant.getText() == null || montant.getText().isBlank()) { showError("Validation", "Montant obligatoire."); return null; }
-            BigDecimal m;
-            try { m = new BigDecimal(montant.getText().trim()); if (m.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Montant invalide (nombre >= 0)."); return null; }
+            double m;
+            try { m = Double.parseDouble(montant.getText().trim()); if (m < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Montant invalide (nombre >= 0)."); return null; }
             User selUser = comboUser.getSelectionModel().getSelectedItem();
             Voyage selVoyage = comboVoyage.getSelectionModel().getSelectedItem();
             Activite selActivite = comboActivite.getSelectionModel().getSelectedItem();

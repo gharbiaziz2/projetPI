@@ -25,7 +25,6 @@ import tn.esprit.services.VoyageDestinationServices;
 import tn.esprit.services.VoyageServices;
 import tn.esprit.utils.EmailUtil;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +50,7 @@ public class VoyageController {
     @FXML
     private TableColumn<Voyage, String> colDateRetour;
     @FXML
-    private TableColumn<Voyage, BigDecimal> colPrix;
+    private TableColumn<Voyage, Double> colPrix;
     @FXML
     private TableColumn<Voyage, Number> colPlaces;
     @FXML
@@ -262,10 +261,10 @@ public class VoyageController {
         d.setTitle(title);
         d.initModality(Modality.APPLICATION_MODAL);
         DialogStyleHelper.styleDialogPane(d.getDialogPane());
-        TextField nom = new TextField(v.getNomVoyage());
+        TextField nom = new TextField(v.getTypeVoyage());
         DatePicker dateD = new DatePicker(v.getDateDepart());
         DatePicker dateR = new DatePicker(v.getDateRetour());
-        TextField prix = new TextField(v.getPrix() != null ? v.getPrix().toString() : "");
+        TextField prix = new TextField(v.getPrix() > 0 ? String.valueOf(v.getPrix()) : "");
         TextField places = new TextField(v.getPlacesDisponibles() > 0 ? String.valueOf(v.getPlacesDisponibles()) : "");
         ComboBox<String> comboStatut = new ComboBox<>();
         comboStatut.getItems().addAll("visible", "non visible");
@@ -364,7 +363,7 @@ public class VoyageController {
                     super.updateItem(act, empty);
                     setText(act == null || empty ? ""
                             : (act.getNom() != null ? act.getNom() : "?")
-                                    + (act.getPrix() != null ? " - " + act.getPrix() + " DT" : ""));
+                                    + (act.getPrix() > 0 ? " - " + act.getPrix() + " DT" : ""));
                 }
             });
             if (v.getIdVoyage() > 0) {
@@ -440,10 +439,10 @@ public class VoyageController {
                 showError("Validation", "Places obligatoires.");
                 return null;
             }
-            BigDecimal p;
+            double p;
             try {
-                p = new BigDecimal(prix.getText().trim());
-                if (p.compareTo(BigDecimal.ZERO) < 0)
+                p = Double.parseDouble(prix.getText().trim());
+                if (p < 0)
                     throw new NumberFormatException();
             } catch (Exception e) {
                 showError("Validation", "Prix invalide (nombre >= 0).");
@@ -467,7 +466,7 @@ public class VoyageController {
                 showError("Validation", "Guide obligatoire.");
                 return null;
             }
-            v.setNomVoyage(nom.getText().trim());
+            v.setTypeVoyage(nom.getText().trim());
             v.setDateDepart(dd);
             v.setDateRetour(dr);
             v.setPrix(p);
@@ -517,11 +516,11 @@ public class VoyageController {
                 service.appliquerPromo(voyage.getIdVoyage());
                 nbPromo++;
 
-                // Calcul du nouveau prix en BigDecimal : prix * 0.8
-                BigDecimal nouveauPrix = voyage.getPrix().multiply(new BigDecimal("0.8"));
+                // Calcul du nouveau prix : prix * 0.8
+                double nouveauPrix = voyage.getPrix() * 0.8;
 
                 // Appel de l'envoi d'email en arrière-plan
-                EmailUtil.envoyerPromoEmail(emailsClients, voyage.getNomVoyage(), nouveauPrix);
+                EmailUtil.envoyerPromoEmail(emailsClients, voyage.getTypeVoyage(), nouveauPrix);
             }
 
             // Rafraîchir l'affichage de la table JavaFX
@@ -539,5 +538,55 @@ public class VoyageController {
             e.printStackTrace();
             showError("Erreur Base de données", "Impossible d'appliquer la promotion.\n" + e.getMessage());
         }
+    }
+
+    @FXML
+    private void onApprouverProposition() {
+        Voyage v = table.getSelectionModel().getSelectedItem();
+        if (v == null) {
+            showError("Sélection", "Veuillez sélectionner une proposition de voyage.");
+            return;
+        }
+        if (!v.isEstPropositionClient()) {
+            showError("Erreur", "Ce voyage n'est pas une proposition client.");
+            return;
+        }
+        v.setStatut("visible");
+        v.setEstPropositionClient(false);
+        try {
+            service.modifier(v);
+            refresh();
+            showInfo("Succès", "Proposition acceptée ! Le voyage est maintenant visible pour tous les clients.");
+        } catch (SQLException e) {
+            showError("Erreur", "Impossible d'approuver la proposition: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onRefuserProposition() {
+        Voyage v = table.getSelectionModel().getSelectedItem();
+        if (v == null) {
+            showError("Sélection", "Veuillez sélectionner une proposition de voyage.");
+            return;
+        }
+        if (!v.isEstPropositionClient()) {
+            showError("Erreur", "Ce voyage n'est pas une proposition client.");
+            return;
+        }
+        v.setStatut("non visible");
+        try {
+            service.modifier(v);
+            refresh();
+            showInfo("Succès", "Proposition refusée.");
+        } catch (SQLException e) {
+            showError("Erreur", "Impossible de refuser la proposition: " + e.getMessage());
+        }
+    }
+
+    private void showInfo(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(title);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }

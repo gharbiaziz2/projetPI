@@ -16,7 +16,6 @@ import tn.esprit.entities.User;
 import tn.esprit.services.ReservationTransportServices;
 import tn.esprit.services.UserServices;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,7 +27,7 @@ public class ReservationTransportController {
     @FXML private TableView<ReservationTransport> table;
     @FXML private TableColumn<ReservationTransport, String> colDateReservation;
     @FXML private TableColumn<ReservationTransport, String> colStatut;
-    @FXML private TableColumn<ReservationTransport, BigDecimal> colPrixTotal;
+    @FXML private TableColumn<ReservationTransport, Double> colPrixTotal;
     @FXML private TableColumn<ReservationTransport, String> colUser;
     @FXML private TextField searchField;
     @FXML private Button btnFilter;
@@ -57,7 +56,7 @@ public class ReservationTransportController {
         filteredList.setPredicate(r -> {
             if (filterStatut != null && r.getStatut() != filterStatut) return false;
             if (q.isEmpty()) return true;
-            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || (r.getPrixTotal() != null && r.getPrixTotal().toString().contains(q)) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q);
+            return (r.getStatut() != null && r.getStatut().name().toLowerCase().contains(q)) || String.valueOf(r.getPrixTotal()).contains(q) || userDisplay.getOrDefault(r.getIdUser(), "").toLowerCase().contains(q);
         });
     }
 
@@ -131,7 +130,7 @@ public class ReservationTransportController {
         DatePicker dateResa = new DatePicker(r.getDateReservation());
         ComboBox<ReservationTransport.StatutReservation> statutCombo = new ComboBox<>(FXCollections.observableArrayList(ReservationTransport.StatutReservation.values()));
         statutCombo.getSelectionModel().select(r.getStatut());
-        TextField prix = new TextField(r.getPrixTotal() != null ? r.getPrixTotal().toString() : "");
+        TextField prix = new TextField(r.getPrixTotal() > 0 ? String.valueOf(r.getPrixTotal()) : "");
         ComboBox<User> comboUser = new ComboBox<>();
         comboUser.setConverter(new StringConverter<User>() {
             @Override public String toString(User u) { return u == null ? "" : u.getNom() + " " + u.getPrenom(); }
@@ -163,8 +162,8 @@ public class ReservationTransportController {
             if (dr == null) { showError("Validation", "Date réservation obligatoire."); return null; }
             if (statutCombo.getSelectionModel().getSelectedItem() == null) { showError("Validation", "Statut obligatoire."); return null; }
             if (prix.getText() == null || prix.getText().isBlank()) { showError("Validation", "Prix total obligatoire."); return null; }
-            BigDecimal p;
-            try { p = new BigDecimal(prix.getText().trim()); if (p.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
+            double p;
+            try { p = Double.parseDouble(prix.getText().trim()); if (p < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
             User selUser = comboUser.getSelectionModel().getSelectedItem();
             if (selUser == null) { showError("Validation", "User obligatoire."); return null; }
             r.setDateReservation(dr);

@@ -447,7 +447,7 @@ public class FrontHomeController implements Initializable {
             Label descL = new Label(a.getDescription() != null ? a.getDescription() : "");
             descL.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569;");
             descL.setWrapText(true);
-            Label prixL = new Label("Prix: " + (a.getPrix() != null ? a.getPrix().toString() : "0") + " DT");
+            Label prixL = new Label("Prix: " + a.getPrix() + " DT");
             prixL.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;");
             Label dureeL = new Label("Durée: " + a.getDuree() + " min");
             dureeL.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");

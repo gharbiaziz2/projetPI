@@ -26,8 +26,11 @@
             <Button fx:id="menuActivite" text="  Activité" styleClass="sidebar-menu-item" onAction="#goActivite"/>
             <Button fx:id="menuDestination" text="  Destination" styleClass="sidebar-menu-item" onAction="#goDestination"/>
             <Button fx:id="menuHotel" text="  Hôtel" styleClass="sidebar-menu-item" onAction="#goHotel"/>
+            <Button fx:id="menuChambre" text="    ↳ Chambres" styleClass="sidebar-menu-item" onAction="#goChambre"/>
             <Button fx:id="menuTransportLocal" text="  Transport" styleClass="sidebar-menu-item" onAction="#goTransportLocal"/>
             <Button fx:id="menuForum" text="  Forum" styleClass="sidebar-menu-item" onAction="#goForum"/>
+            <Button fx:id="menuProgramme" text="  Programme" styleClass="sidebar-menu-item" onAction="#goProgramme"/>
+            <Button fx:id="menuSuggestion" text="  Suggestions" styleClass="sidebar-menu-item" onAction="#goSuggestion"/>
             <Label text="RÉSERVATIONS" styleClass="sidebar-section"/>
             <Button fx:id="menuReservationVoyage" text="  Résa. Voyage" styleClass="sidebar-menu-item" onAction="#goReservationVoyage"/>
             <Button fx:id="menuReservationHotel" text="  Résa. Hôtel" styleClass="sidebar-menu-item" onAction="#goReservationHotel"/>

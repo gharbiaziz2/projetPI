@@ -156,7 +156,7 @@ public class TransportLocalController {
         TextField paysA = new TextField(t.getPaysArrivee());
         DatePicker dateD = new DatePicker(t.getDateDepart());
         DatePicker dateR = new DatePicker(t.getDateRetour());
-        TextField prix = new TextField(t.getPrix() != null ? t.getPrix().toString() : "");
+        TextField prix = new TextField(Double.toString(t.getPrix()));
         ComboBox<Voyage> comboVoyage = new ComboBox<>();
         comboVoyage.setConverter(new StringConverter<Voyage>() {
             @Override public String toString(Voyage v) {

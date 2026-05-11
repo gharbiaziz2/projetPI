@@ -16,9 +16,10 @@
                 <TableColumn fx:id="colDateReservation" text="Date" prefWidth="100"/>
                 <TableColumn fx:id="colStatut" text="Statut" prefWidth="100"/>
                 <TableColumn fx:id="colMontant" text="Montant" prefWidth="90"/>
-                <TableColumn fx:id="colUser" text="User" prefWidth="120"/>
-                <TableColumn fx:id="colVoyage" text="Voyage" prefWidth="120"/>
-                <TableColumn fx:id="colActivite" text="Activite" prefWidth="120"/>
+                <TableColumn fx:id="colUser" text="User" prefWidth="110"/>
+                <TableColumn fx:id="colVoyage" text="Voyage" prefWidth="110"/>
+                <TableColumn fx:id="colActivite" text="Activite" prefWidth="110"/>
+                <TableColumn fx:id="colPhoneNumber" text="Téléphone" prefWidth="100"/>
             </columns>
         </TableView>
     </VBox>

@@ -3,7 +3,6 @@ package tn.esprit.services;
 import tn.esprit.config.DBConnection;
 import tn.esprit.entities.Activite;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,11 +20,11 @@ public class ActiviteServices {
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, a.getNom());
         ps.setString(2, a.getDescription());
-        ps.setBigDecimal(3, a.getPrix());
+        ps.setDouble(3, a.getPrix());
         ps.setInt(4, a.getDuree());
         ps.setObject(5, a.getLatitude());
         ps.setObject(6, a.getLongitude());
-        ps.setDate(7, a.getDate() != null ? Date.valueOf(a.getDate()) : null);
+        ps.setDate(7, a.getDateActivite() != null ? Date.valueOf(a.getDateActivite()) : null);
         ps.setString(8, a.getPhoto());
         ps.executeUpdate();
     }
@@ -35,11 +34,11 @@ public class ActiviteServices {
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, a.getNom());
         ps.setString(2, a.getDescription());
-        ps.setBigDecimal(3, a.getPrix());
+        ps.setDouble(3, a.getPrix());
         ps.setInt(4, a.getDuree());
         ps.setObject(5, a.getLatitude());
         ps.setObject(6, a.getLongitude());
-        ps.setDate(7, a.getDate() != null ? Date.valueOf(a.getDate()) : null);
+        ps.setDate(7, a.getDateActivite() != null ? Date.valueOf(a.getDateActivite()) : null);
         ps.setString(8, a.getPhoto());
         ps.setInt(9, a.getIdActivite());
         ps.executeUpdate();
@@ -68,7 +67,7 @@ public class ActiviteServices {
                     rs.getInt("id_activite"),
                     rs.getString("nom"),
                     rs.getString("description"),
-                    rs.getBigDecimal("prix"),
+                    rs.getDouble("prix"),
                     rs.getInt("duree"),
                     lat,
                     lon,

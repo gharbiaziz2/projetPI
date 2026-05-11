@@ -79,7 +79,7 @@ public class TransportRecommendationService {
             for (int i = 0; i < transports.size(); i++) {
                 TransportLocal t = transports.get(i);
                 String type = t.getTypeTransport() != null ? t.getTypeTransport().name() : "?";
-                String prix = t.getPrix() != null ? t.getPrix().toString() : "?";
+                String prix = String.valueOf(t.getPrix());
                 String places = String.valueOf(t.getNbrPlaces());
                 transportList.append(i + 1).append(". ").append(t.getCompagnie())
                         .append(" | Type: ").append(type)
@@ -90,8 +90,8 @@ public class TransportRecommendationService {
                 }
                 transportList.append("\n");
             }
-            String voyageInfo = "Voyage: " + (voyage.getNomVoyage() != null ? voyage.getNomVoyage() : "?")
-                    + " | Prix: " + (voyage.getPrix() != null ? voyage.getPrix() : "?") + " DT"
+            String voyageInfo = "Voyage: " + (voyage.getTypeVoyage() != null ? voyage.getTypeVoyage() : "?")
+                    + " | Prix: " + voyage.getPrix() + " DT"
                     + " | Dates: " + (voyage.getDateDepart() != null ? voyage.getDateDepart() : "?")
                     + " - " + (voyage.getDateRetour() != null ? voyage.getDateRetour() : "?");
 
@@ -149,21 +149,23 @@ public class TransportRecommendationService {
     private Recommendation recommendTransportFallback(List<TransportLocal> transports) {
         int best = 0;
         int bestPlaces = transports.get(0).getNbrPlaces();
-        java.math.BigDecimal bestPrix = transports.get(0).getPrix();
+        double bestPrix = transports.get(0).getPrix();
         for (int i = 1; i < transports.size(); i++) {
             TransportLocal t = transports.get(i);
             boolean better = t.getNbrPlaces() > bestPlaces;
-            if (!better && t.getNbrPlaces() == bestPlaces && t.getPrix() != null && bestPrix != null)
-                better = t.getPrix().compareTo(bestPrix) < 0;
+            if (!better && t.getNbrPlaces() == bestPlaces)
+                better = t.getPrix() < bestPrix;
             if (better) {
                 best = i;
                 bestPlaces = t.getNbrPlaces();
                 bestPrix = t.getPrix();
             }
         }
+        // Transport selected at index:
+        @SuppressWarnings("unused")
         TransportLocal t = transports.get(best);
         String reason;
-        if (bestPlaces > 0 && t.getPrix() != null) {
+        if (bestPlaces > 0) {
             reason = bestPlaces > 3 ? "Plus de places disponibles (" + bestPlaces + ") et bon rapport qualité-prix."
                     : "Meilleur rapport places/prix pour ce voyage.";
         } else {

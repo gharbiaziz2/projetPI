@@ -70,7 +70,7 @@ public class VoyageActiviteServices {
                     rs.getInt("id_activite"),
                     rs.getString("nom"),
                     rs.getString("description"),
-                    rs.getBigDecimal("prix"),
+                    rs.getDouble("prix"),
                     rs.getInt("duree"),
                     lat,
                     lon,

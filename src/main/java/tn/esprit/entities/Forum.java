@@ -8,8 +8,11 @@ public class Forum {
     private LocalDateTime dateEnvoi;
     private int idUser;
     private int idVoyage;
+    private String titre;
+    private String status;
 
     public Forum() {
+        this.status = "ACTIVE";
     }
 
     public Forum(int idForum, String contenu, LocalDateTime dateEnvoi, int idUser, int idVoyage) {
@@ -18,6 +21,17 @@ public class Forum {
         this.dateEnvoi = dateEnvoi;
         this.idUser = idUser;
         this.idVoyage = idVoyage;
+        this.status = "ACTIVE";
+    }
+
+    public Forum(int idForum, String contenu, LocalDateTime dateEnvoi, int idUser, int idVoyage, String titre, String status) {
+        this.idForum = idForum;
+        this.contenu = contenu;
+        this.dateEnvoi = dateEnvoi;
+        this.idUser = idUser;
+        this.idVoyage = idVoyage;
+        this.titre = titre;
+        this.status = status;
     }
 
     public int getIdForum() { return idForum; }
@@ -30,4 +44,8 @@ public class Forum {
     public void setIdUser(int idUser) { this.idUser = idUser; }
     public int getIdVoyage() { return idVoyage; }
     public void setIdVoyage(int idVoyage) { this.idVoyage = idVoyage; }
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

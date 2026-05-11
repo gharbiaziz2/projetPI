@@ -6,6 +6,7 @@ import tn.esprit.util.PasswordUtil;
 
 import java.sql.*;
 import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,7 +20,7 @@ public class UserServices {
 
     public void ajouter(User u) throws SQLException {
         String pwd = hashPasswordIfNeeded(u.getMotDePasse());
-        String sql = "INSERT INTO `user` (nom, prenom, email, mot_de_passe, role, statut, date_creation, telephone, adresse, photo, bio) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO `user` (nom, prenom, email, mot_de_passe, role, statut, date_creation, telephone, adresse, photo, bio, bad_word_count, google_id, google_avatar, reset_password_token, reset_password_expires_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, u.getNom());
         ps.setString(2, u.getPrenom());
@@ -32,12 +33,17 @@ public class UserServices {
         ps.setString(9, u.getAdresse());
         ps.setString(10, u.getPhoto());
         ps.setString(11, u.getBio());
+        ps.setInt(12, u.getBadWordCount());
+        ps.setString(13, u.getGoogleId());
+        ps.setString(14, u.getGoogleAvatar());
+        ps.setString(15, u.getResetPasswordToken());
+        ps.setTimestamp(16, u.getResetPasswordExpiresAt() != null ? Timestamp.valueOf(u.getResetPasswordExpiresAt()) : null);
         ps.executeUpdate();
     }
 
     public void modifier(User u) throws SQLException {
         String pwd = hashPasswordIfNeeded(u.getMotDePasse());
-        String sql = "UPDATE `user` SET nom=?, prenom=?, email=?, mot_de_passe=?, role=?, statut=?, date_creation=?, telephone=?, adresse=?, photo=?, bio=? WHERE id_user=?";
+        String sql = "UPDATE `user` SET nom=?, prenom=?, email=?, mot_de_passe=?, role=?, statut=?, date_creation=?, telephone=?, adresse=?, photo=?, bio=?, bad_word_count=?, google_id=?, google_avatar=?, reset_password_token=?, reset_password_expires_at=? WHERE id_user=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, u.getNom());
         ps.setString(2, u.getPrenom());
@@ -50,7 +56,12 @@ public class UserServices {
         ps.setString(9, u.getAdresse());
         ps.setString(10, u.getPhoto());
         ps.setString(11, u.getBio());
-        ps.setInt(12, u.getIdUser());
+        ps.setInt(12, u.getBadWordCount());
+        ps.setString(13, u.getGoogleId());
+        ps.setString(14, u.getGoogleAvatar());
+        ps.setString(15, u.getResetPasswordToken());
+        ps.setTimestamp(16, u.getResetPasswordExpiresAt() != null ? Timestamp.valueOf(u.getResetPasswordExpiresAt()) : null);
+        ps.setInt(17, u.getIdUser());
         ps.executeUpdate();
     }
 
@@ -67,23 +78,33 @@ public class UserServices {
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
-            User u = new User(
-                    rs.getInt("id_user"),
-                    rs.getString("nom"),
-                    rs.getString("prenom"),
-                    rs.getString("email"),
-                    rs.getString("mot_de_passe"),
-                    User.Role.valueOf(rs.getString("role")),
-                    User.Statut.valueOf(rs.getString("statut")),
-                    rs.getDate("date_creation").toLocalDate(),
-                    rs.getString("telephone"),
-                    rs.getString("adresse"),
-                    rs.getString("photo"),
-                    rs.getString("bio")
-            );
-            list.add(u);
+            list.add(mapUser(rs));
         }
         return list;
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        User u = new User(
+                rs.getInt("id_user"),
+                rs.getString("nom"),
+                rs.getString("prenom"),
+                rs.getString("email"),
+                rs.getString("mot_de_passe"),
+                User.Role.valueOf(rs.getString("role")),
+                User.Statut.valueOf(rs.getString("statut")),
+                rs.getDate("date_creation").toLocalDate(),
+                rs.getString("telephone"),
+                rs.getString("adresse"),
+                rs.getString("photo"),
+                rs.getString("bio")
+        );
+        u.setBadWordCount(rs.getInt("bad_word_count"));
+        u.setGoogleId(rs.getString("google_id"));
+        u.setGoogleAvatar(rs.getString("google_avatar"));
+        u.setResetPasswordToken(rs.getString("reset_password_token"));
+        Timestamp rpExpires = rs.getTimestamp("reset_password_expires_at");
+        u.setResetPasswordExpiresAt(rpExpires != null ? rpExpires.toLocalDateTime() : null);
+        return u;
     }
 
     /**
@@ -114,20 +135,7 @@ public class UserServices {
         ps.setInt(1, idUser);
         ResultSet rs = ps.executeQuery();
         if (!rs.next()) return null;
-        return new User(
-                rs.getInt("id_user"),
-                rs.getString("nom"),
-                rs.getString("prenom"),
-                rs.getString("email"),
-                rs.getString("mot_de_passe"),
-                User.Role.valueOf(rs.getString("role")),
-                User.Statut.valueOf(rs.getString("statut")),
-                rs.getDate("date_creation").toLocalDate(),
-                rs.getString("telephone"),
-                rs.getString("adresse"),
-                rs.getString("photo"),
-                rs.getString("bio")
-        );
+        return mapUser(rs);
     }
 
     /**
@@ -176,19 +184,19 @@ public class UserServices {
         ps.setString(1, email.trim());
         ResultSet rs = ps.executeQuery();
         if (!rs.next()) return null;
-        return new User(
-                rs.getInt("id_user"),
-                rs.getString("nom"),
-                rs.getString("prenom"),
-                rs.getString("email"),
-                rs.getString("mot_de_passe"),
-                User.Role.valueOf(rs.getString("role")),
-                User.Statut.valueOf(rs.getString("statut")),
-                rs.getDate("date_creation").toLocalDate(),
-                rs.getString("telephone"),
-                rs.getString("adresse"),
-                rs.getString("photo"),
-                rs.getString("bio")
-        );
+        return mapUser(rs);
+    }
+
+    /** Returns all users with the given role. */
+    public List<User> getUsersByRole(User.Role role) throws SQLException {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM `user` WHERE role = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, role.name());
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            list.add(mapUser(rs));
+        }
+        return list;
     }
 }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.gui.VoyagePropositionAdminController">
+    <top>
+        <VBox spacing="10.0" style="-fx-padding: 15;" BorderPane.alignment="TOP_CENTER">
+            <children>
+                <Label text="Gestion des Propositions de Voyages" textAlignment="CENTER">
+                    <font>
+                        <Font size="20.0" />
+                    </font>
+                </Label>
+                <Label fx:id="selectedVoyageLabel" text="Aucun voyage sélectionné" textAlignment="CENTER" />
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.5" orientation="VERTICAL" style="-fx-padding: 10;" BorderPane.alignment="CENTER">
+            <items>
+                <VBox spacing="10.0">
+                    <children>
+                        <Label text="📋 Propositions en Attente" textAlignment="CENTER">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <TableView fx:id="propositionsTable" prefHeight="300.0">
+                            <columns>
+                                <TableColumn fx:id="colTypeVoyage" prefWidth="120.0" text="Type Voyage" />
+                                <TableColumn fx:id="colDateDepart" prefWidth="100.0" text="Date Départ" />
+                                <TableColumn fx:id="colDateRetour" prefWidth="100.0" text="Date Retour" />
+                                <TableColumn fx:id="colPrix" prefWidth="100.0" text="Budget" />
+                                <TableColumn fx:id="colClient" prefWidth="120.0" text="Client" />
+                                <TableColumn fx:id="colStatut" prefWidth="100.0" text="Statut" />
+                            </columns>
+                        </TableView>
+                        <HBox spacing="10.0">
+                            <children>
+                                <Button fx:id="acceptButton" disable="true" mnemonicParsing="false" prefWidth="120.0" style="-fx-font-size: 12;" text="✅ Accepter" />
+                                <Button fx:id="refuseButton" disable="true" mnemonicParsing="false" prefWidth="120.0" style="-fx-font-size: 12;" text="❌ Refuser" />
+                                <Button fx:id="addProgrammeButton" disable="true" mnemonicParsing="false" prefWidth="180.0" style="-fx-font-size: 12;" text="➕ Ajouter Programme" />
+                            </children>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </HBox>
+                    </children>
+                </VBox>
+                <VBox spacing="10.0">
+                    <children>
+                        <Label text="📅 Programmes du Voyage Sélectionné" textAlignment="CENTER">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <TableView fx:id="programmeTable" prefHeight="300.0">
+                            <columns>
+                                <TableColumn fx:id="colJour" prefWidth="80.0" text="Jour" />
+                                <TableColumn fx:id="colTitre" prefWidth="150.0" text="Titre" />
+                                <TableColumn fx:id="colLieu" prefWidth="150.0" text="Lieu" />
+                                <TableColumn fx:id="colHeures" prefWidth="120.0" text="Horaires" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>

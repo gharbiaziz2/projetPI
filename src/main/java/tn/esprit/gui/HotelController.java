@@ -18,7 +18,6 @@ import java.io.File;
 import tn.esprit.gui.DialogStyleHelper;
 import tn.esprit.services.HotelServices;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 
 public class HotelController {
@@ -27,7 +26,7 @@ public class HotelController {
     @FXML private TableColumn<Hotel, String> colNom;
     @FXML private TableColumn<Hotel, String> colPays;
     @FXML private TableColumn<Hotel, String> colVille;
-    @FXML private TableColumn<Hotel, BigDecimal> colPrixNuit;
+    @FXML private TableColumn<Hotel, Double> colPrixNuit;
     @FXML private TableColumn<Hotel, Double> colLongitude;
     @FXML private TableColumn<Hotel, Double> colLatitude;
     @FXML private TableColumn<Hotel, String> colImage;
@@ -138,7 +137,7 @@ public class HotelController {
         TextField nom = new TextField(h.getNom());
         TextField pays = new TextField(h.getPays());
         TextField ville = new TextField(h.getVille());
-        TextField prix = new TextField(h.getPrixNuit() != null ? h.getPrixNuit().toString() : "");
+        TextField prix = new TextField(h.getPrixNuit() > 0 ? String.valueOf(h.getPrixNuit()) : "");
         TextField longitude = new TextField(h.getLongitude() != null ? h.getLongitude().toString() : "");
         TextField latitude = new TextField(h.getLatitude() != null ? h.getLatitude().toString() : "");
         TextField image = new TextField(h.getImage());
@@ -185,8 +184,8 @@ public class HotelController {
             if (pays.getText() == null || pays.getText().isBlank()) { showError("Validation", "Pays obligatoire."); return null; }
             if (ville.getText() == null || ville.getText().isBlank()) { showError("Validation", "Ville obligatoire."); return null; }
             if (prix.getText() == null || prix.getText().isBlank()) { showError("Validation", "Prix/nuit obligatoire."); return null; }
-            BigDecimal p;
-            try { p = new BigDecimal(prix.getText().trim()); if (p.compareTo(BigDecimal.ZERO) < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
+            double p;
+            try { p = Double.parseDouble(prix.getText().trim()); if (p < 0) throw new NumberFormatException(); } catch (Exception e) { showError("Validation", "Prix invalide (nombre >= 0)."); return null; }
             h.setNom(nom.getText().trim());
             h.setPays(pays.getText().trim());
             h.setVille(ville.getText().trim());
