@@ -43,3 +43,8 @@ src/main/resources/config/google-credentials.json
 
 ### User-uploaded/captured photos ###
 user_photos/
+
+
+.idea/
+*.iml
+target/
